@@ -15,3 +15,10 @@
 - [x] Verify automated rules and desktop/mobile setup through the studio.
 - [ ] Run real external-provider generation. Blocker: no provider-issued credential or accessible connection; an external API key cannot be self-issued or sent in chat.
 - [x] Record results and remaining limitations (`PHASE3-REPORT.md`).
+
+# Phase 3 — AI Gateway code review
+
+- [ ] Add key-creation links beside the existing secure provider input and test it first.
+- [ ] Add authenticated AI Gateway review of the current project or selected files, with prioritized bugs, security risks and concrete fixes.
+- [ ] Require explicit transfer consent, pin reports to project/revision, and never apply review suggestions automatically.
+- [ ] Test actual review with sample code, review validation, and mobile/desktop use.

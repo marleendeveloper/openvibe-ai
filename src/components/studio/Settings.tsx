@@ -64,6 +64,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <input aria-label="API-Key" type="password" autoComplete="off" className="field font-mono" placeholder={PROVIDERS[s.provider].keyHint} value={key} onChange={(e) => setKey(e.target.value)} />
             <span className="block text-xs text-muted-foreground">{status?.configured ? "Schlüssel hinterlegt" : "Kein Schlüssel hinterlegt"} · verschlüsselt, für JavaScript unlesbar · 30 Tage</span>
           </label>
+          {s.provider !== "custom" && <a className="inline-flex items-center gap-1 text-xs text-primary underline" href={s.provider === "openrouter" ? "https://openrouter.ai/settings/keys" : "https://huggingface.co/settings/tokens"} target="_blank" rel="noopener noreferrer"><KeyRound size={13} /> API-Key bei {PROVIDERS[s.provider].name} erstellen ↗</a>}
           <div className="flex flex-wrap gap-2">
             <Btn variant="primary" disabled={working || !key} onClick={() => void action("save")}><KeyRound size={14} /> Sicher speichern</Btn>
             <Btn variant="outline" disabled={working || !status?.configured || !s.model} onClick={() => void action("test")}><PlugZap size={14} /> Verbindung testen</Btn>
