@@ -5,7 +5,7 @@
 - [x] Harden SSE parsing, file operations, project isolation, snapshots and the bounded five-attempt repair loop.
 - [x] Preserve the mobile design; add connection checks, agent progress, undo and data-transfer consent.
 - [x] Run automated mock tests and desktop/mobile browser checks.
-- [ ] Run real external-provider code generation through the preview. Blocker: this workspace has no linked provider connection or external credentials.
+- [ ] Run real external-provider code generation through the preview. Blocker: saved OpenRouter credential exists, but no app user is signed in for the protected activation and test.
 - [x] Write the final technical report with evidence, security limitations and credit balance (`PHASE2-REPORT.md`).
 
 # Phase 3 — Free coding setup and cost protection
@@ -13,5 +13,14 @@
 - [x] Select a currently zero-priced external coding model from the live catalog without claiming a proven strongest model.
 - [x] Add a default-on zero-cost guard for OpenRouter generation and connection tests, with no paid fallback.
 - [x] Verify automated rules and desktop/mobile setup through the studio.
-- [ ] Run real external-provider generation. Blocker: no provider-issued credential or accessible connection; an external API key cannot be self-issued or sent in chat.
+- [ ] Run real external-provider generation. Blocker: saved OpenRouter credential exists, but no app user is signed in for the protected activation and test.
 - [x] Record results and remaining limitations (`PHASE3-REPORT.md`).
+
+# Phase 3 — AI Gateway code review
+
+- [x] Add key-creation links beside the existing secure provider input and test it first.
+- [x] Add authenticated AI Gateway review of the current project or selected files, with prioritized bugs, security risks and concrete fixes.
+- [x] Require explicit transfer consent, pin reports to project/revision, and never apply review suggestions automatically.
+- [x] Test real AI Gateway review service with sample code, review validation, and mobile/desktop selection and sign-in gating.
+- [ ] Complete authenticated in-app review and verify result display. Blocker: there are no auth users; session minting cannot proceed before sign-in.
+- [ ] Use the saved `OPENROUTER_API_KEY` through an authenticated action and run real external coding. Current blocker: no signed-in app user exists for a safe shared-secret test.

@@ -5,6 +5,9 @@ import { PROVIDERS, type ProviderId, type ProviderStatus } from "@/lib/studio/pr
 import { configureProvider, loadProvider } from "@/lib/studio/provider-client";
 import { useRuntime } from "@/lib/studio/runtime";
 import { Btn } from "./ui";
+import { useServerFn } from "@tanstack/react-start";
+import { useSavedOpenRouter } from "@/lib/studio/saved-provider.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Settings({ onClose }: { onClose: () => void }) {
   const { settings: s, setSettings } = useStudio();
@@ -14,6 +17,18 @@ export function Settings({ onClose }: { onClose: () => void }) {
   const [notice, setNotice] = useState("");
   const [working, setWorking] = useState(false);
   const [freeOnly, setFreeOnly] = useState(true);
+  const connectSaved = useServerFn(useSavedOpenRouter);
+  const savedKey = async () => {
+    setWorking(true); setNotice("");
+    try {
+      if (!(await supabase.auth.getSession()).data.session) throw new Error("Bitte zuerst über die Codeprüfung mit Lovable oder Google anmelden, um den gespeicherten Projektschlüssel zu verwenden.");
+      await connectSaved();
+      const result = await loadProvider("openrouter");
+      setStatus(result); useRuntime.getState().setConnected("openrouter", result.configured);
+      setNotice("Gespeicherter Schlüssel verbunden. Verbindungstest bereit.");
+    } catch (e) { setNotice(e instanceof Error ? e.message : "Verbindung fehlgeschlagen."); }
+    finally { setWorking(false); }
+  };
   const models = (status?.models ?? []).filter((m) => s.provider !== "openrouter" || !freeOnly || m.free);
   const modelIds = [...new Set([...models.map((m) => m.id), ...s.customModels])];
   const refresh = async () => {
@@ -64,10 +79,12 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <input aria-label="API-Key" type="password" autoComplete="off" className="field font-mono" placeholder={PROVIDERS[s.provider].keyHint} value={key} onChange={(e) => setKey(e.target.value)} />
             <span className="block text-xs text-muted-foreground">{status?.configured ? "Schlüssel hinterlegt" : "Kein Schlüssel hinterlegt"} · verschlüsselt, für JavaScript unlesbar · 30 Tage</span>
           </label>
+          {s.provider !== "custom" && <a className="inline-flex items-center gap-1 text-xs text-primary underline" href={s.provider === "openrouter" ? "https://openrouter.ai/settings/keys" : "https://huggingface.co/settings/tokens"} target="_blank" rel="noopener noreferrer"><KeyRound size={13} /> API-Key bei {PROVIDERS[s.provider].name} erstellen ↗</a>}
           <div className="flex flex-wrap gap-2">
             <Btn variant="primary" disabled={working || !key} onClick={() => void action("save")}><KeyRound size={14} /> Sicher speichern</Btn>
             <Btn variant="outline" disabled={working || !status?.configured || !s.model} onClick={() => void action("test")}><PlugZap size={14} /> Verbindung testen</Btn>
             <Btn title="Schlüssel entfernen" disabled={working || !status?.configured} onClick={() => void action("remove")}><Trash2 size={14} /></Btn>
+            {s.provider === "openrouter" && <Btn variant="outline" disabled={working} onClick={() => void savedKey()}><KeyRound size={14} /> Gespeicherten Schlüssel verwenden</Btn>}
           </div>
           {notice && <p role="status" className="break-words whitespace-pre-wrap border-l-2 border-primary pl-2 text-xs">{notice}</p>}
           <label className="block space-y-1">

@@ -57,6 +57,9 @@
   --border: oklch(0.27 0.008 260);
   --input: oklch(0.27 0.008 260);
   --ring: oklch(0.9 0.19 125);
+  --google-background: #131314;
+  --google-border: #8e918f;
+  --google-foreground: #e3e3e3;
 }
 
 @layer base {
@@ -92,3 +95,12 @@
 .sp-preview, .sp-preview-container { height: 100% !important; display: flex; flex-direction: column; }
 .sp-preview-iframe { flex: 1; height: 100% !important; min-height: 0; }
 .openvibe-preview-ready .sp-loading { display: none !important; }
+.google-auth-button {
+  background: var(--google-background);
+  border: 1px solid var(--google-border);
+  color: var(--google-foreground);
+  height: 40px;
+  padding: 0 12px;
+  gap: 10px;
+  font-weight: 500;
+}
