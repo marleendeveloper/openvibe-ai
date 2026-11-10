@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Archivo", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -35,28 +35,29 @@
 }
 
 :root {
-  --radius: 0.5rem;
-  --background: oklch(0.14 0.005 260);
-  --panel: oklch(0.17 0.006 260);
-  --foreground: oklch(0.94 0.005 260);
-  --card: oklch(0.2 0.007 260);
-  --card-foreground: oklch(0.94 0.005 260);
-  --popover: oklch(0.2 0.007 260);
-  --popover-foreground: oklch(0.94 0.005 260);
-  --primary: oklch(0.9 0.19 125);
-  --primary-foreground: oklch(0.16 0.02 125);
-  --secondary: oklch(0.24 0.008 260);
-  --secondary-foreground: oklch(0.94 0.005 260);
-  --muted: oklch(0.22 0.006 260);
-  --muted-foreground: oklch(0.65 0.01 260);
-  --accent: oklch(0.26 0.01 260);
-  --accent-foreground: oklch(0.96 0.005 260);
-  --destructive: oklch(0.66 0.2 25);
+  --radius: 0.75rem;
+  --background: oklch(0.13 0.012 290);
+  --panel: oklch(0.16 0.016 290);
+  --foreground: oklch(0.96 0.005 290);
+  --card: oklch(0.19 0.02 290);
+  --card-foreground: oklch(0.96 0.005 290);
+  --popover: oklch(0.19 0.02 290);
+  --popover-foreground: oklch(0.96 0.005 290);
+  --primary: oklch(0.62 0.22 295);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.23 0.025 290);
+  --secondary-foreground: oklch(0.96 0.005 290);
+  --muted: oklch(0.21 0.018 290);
+  --muted-foreground: oklch(0.68 0.02 290);
+  --accent: oklch(0.25 0.04 295);
+  --accent-foreground: oklch(0.97 0.005 290);
+  --destructive: oklch(0.63 0.21 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --success: oklch(0.78 0.15 155);
-  --border: oklch(0.27 0.008 260);
-  --input: oklch(0.27 0.008 260);
-  --ring: oklch(0.9 0.19 125);
+  --success: oklch(0.74 0.16 155);
+  --border: oklch(0.26 0.02 290);
+  --input: oklch(0.28 0.025 290);
+  --ring: oklch(0.62 0.22 295);
+  --gradient-primary: linear-gradient(135deg, oklch(0.62 0.22 295), oklch(0.55 0.24 280));
   --google-background: #131314;
   --google-border: #8e918f;
   --google-foreground: #e3e3e3;
@@ -66,7 +67,7 @@
   * { border-color: var(--color-border); }
   html, body { height: 100%; }
   html { letter-spacing: 0; }
-  body { overflow: hidden; }
+  body { overflow: hidden; background-image: radial-gradient(ellipse 80% 40% at 50% -10%, color-mix(in oklab, var(--primary) 18%, transparent), transparent); }
   textarea { min-width: 0; }
   body {
     background-color: var(--color-background);
@@ -78,6 +79,7 @@
   @media (min-width: 768px) { input, textarea, select { font-size: 14px; } }
 }
 
+@utility brand-gradient { background: var(--gradient-primary); }
 @utility glow { box-shadow: 0 0 0 1px var(--primary), 0 0 24px -6px var(--primary); }
 @utility field {
   width: 100%;
