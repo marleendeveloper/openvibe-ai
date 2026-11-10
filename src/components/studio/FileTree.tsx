@@ -3,6 +3,7 @@ import { FilePlus, FileCode2, Trash2, Pencil, FolderPlus, Download, Upload, Plus
 import { useProject, useStudio } from "@/lib/studio/store";
 import { normalizePath } from "@/lib/studio/parse";
 import { Btn } from "./ui";
+import { CloudSync } from "./CloudSync";
 import { cn } from "@/lib/utils";
 
 export function FileTree({ onOpen }: { onOpen?: () => void }) {
@@ -89,6 +90,7 @@ export function FileTree({ onOpen }: { onOpen?: () => void }) {
           );
         })}
       </ul>
+      <CloudSync />
     </div>
   );
 }
