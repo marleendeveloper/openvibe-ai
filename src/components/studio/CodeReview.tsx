@@ -46,7 +46,7 @@ export function CodeReview({ onClose }: { onClose: () => void }) {
     const url = URL.createObjectURL(new Blob([JSON.stringify(result, null, 2)], { type: "application/json" }));
     const link = document.createElement("a"); link.href = url; link.download = "openvibe-code-review.json"; link.click(); URL.revokeObjectURL(url);
   }
-  return <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center">
+  return <div className="tab-in *:dialog-in fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center">
     <section role="dialog" aria-modal="true" aria-label="Codeprüfung" className="flex max-h-[92dvh] w-full max-w-3xl flex-col overflow-hidden rounded-t-lg border bg-card md:rounded-lg">
       <header className="flex shrink-0 items-center gap-2 border-b p-4"><ShieldCheck size={19} className="text-primary" /><h2 className="font-semibold">Codeprüfung</h2><Btn title="Codeprüfung schließen" className="ml-auto" onClick={onClose}><X size={18} /></Btn></header>
       <div className="space-y-4 overflow-auto p-4 text-sm">

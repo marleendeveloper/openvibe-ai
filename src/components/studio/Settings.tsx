@@ -57,7 +57,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
+    <div className="tab-in *:dialog-in fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
       <div className="max-h-[92dvh] w-full max-w-xl overflow-auto rounded-t-xl border bg-card p-5 md:rounded-xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center">
           <h2 className="text-lg font-semibold">Einstellungen</h2>

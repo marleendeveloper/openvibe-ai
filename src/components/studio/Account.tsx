@@ -49,7 +49,7 @@ export function Account({ onClose }: { onClose: () => void }) {
     catch (e) { setError(e instanceof Error ? e.message : "Anmeldung fehlgeschlagen."); }
     finally { setBusy(false); }
   }
-  return <div className="fixed inset-0 z-[60] flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center">
+  return <div className="tab-in *:dialog-in fixed inset-0 z-[60] flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center">
     <section role="dialog" aria-modal="true" aria-label={user ? "Mein Profil" : "Anmeldung"} className="max-h-[92dvh] w-full max-w-md overflow-auto rounded-t-lg border bg-card p-5 md:rounded-lg">
       <header className="mb-5 flex items-center gap-2"><UserRound size={19} className="text-primary" /><h2 className="font-semibold">{user ? "Mein Profil" : "OpenVibe Konto"}</h2><Btn title="Konto schließen" className="ml-auto" onClick={onClose}><X size={18} /></Btn></header>
       {loading ? <LoaderCircle className="animate-spin" /> : <>
