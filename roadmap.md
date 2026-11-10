@@ -40,7 +40,11 @@
 
 # Phase 4
 
-- [ ] Define scope. Blocker: no Phase 4 brief from the user yet.
+- [ ] Cloud-Speicher für Projekte: Tabellen, serverseitige Speicher-/Ladefunktionen, Studio-Sync bei Anmeldung.
+- [ ] Chat-Verlauf pro Projekt in der Datenbank, beim Laden wiederherstellen.
+- [ ] Apps veröffentlichen: öffentlicher Link pro Projekt, öffentliche Ansicht, Veröffentlichung zurücknehmen.
+- [ ] Tests: automatische Regeln plus Handy/Desktop-Browserprüfung des Speicherns, Ladens und Veröffentlichens.
+- [ ] Anmelde-Rundlauf mit der E-Mail des Nutzers: Registrierung, Bestätigung, Login, Logout.
 
 # End-to-end brief (real Nemotron, mobile)
 

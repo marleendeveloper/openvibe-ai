@@ -22,6 +22,8 @@ export type Project = {
   messages: Message[];
   history: Snapshot[];
   updatedAt: number;
+  /** Verknüpfung zur Cloud-Zeile, wenn das Projekt im Konto gespeichert ist. */
+  cloudId?: string;
 };
 
 export const DEFAULT_FILES: Files = {
@@ -110,6 +112,9 @@ type State = {
   addMessage: (m: Message, projectId?: string) => void;
   updateMessage: (id: string, patch: Partial<Message>, projectId?: string) => void;
   clearChat: () => void;
+  setCloudId: (id: string, cloudId: string | undefined) => void;
+  /** Cloud-Projekt lokal anlegen oder aktualisieren; wählt es aus. */
+  importCloudProject: (p: { cloudId: string; name: string; files: Files; messages: Message[] }) => void;
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -221,6 +226,27 @@ export const useStudio = create<State>()(
         updateMessage: (id, patch, projectId) =>
           patchCurrent((p) => ({ ...p, messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)) }), projectId),
         clearChat: () => patchCurrent((p) => ({ ...p, messages: [] })),
+        setCloudId: (id, cloudId) =>
+          set((s) => ({
+            projects: s.projects.map((p) => {
+              if (p.id !== id) return p;
+              const next = { ...p };
+              if (cloudId) next.cloudId = cloudId;
+              else delete next.cloudId;
+              return next;
+            }),
+          })),
+        importCloudProject: (p) => {
+          const files = validateFiles(p.files);
+          set((s) => {
+            const existing = s.projects.find((x) => x.cloudId === p.cloudId);
+            if (existing) {
+              return { projects: s.projects.map((x) => (x.cloudId === p.cloudId ? { ...x, name: p.name, files, messages: p.messages } : x)), currentId: existing.id, activeFile: files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(files)[0] ?? "" };
+            }
+            const np: Project = { id: uid(), name: p.name, files, messages: p.messages, history: [], updatedAt: Date.now(), cloudId: p.cloudId };
+            return { projects: [np, ...s.projects], currentId: np.id, activeFile: files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(files)[0] ?? "" };
+          });
+        },
       };
     },
     {
