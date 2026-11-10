@@ -52,3 +52,6 @@
 - [x] Real repair after broken first version: Nemotron created missing file, preview fixed.
 - [x] Undo restores previous state; 48 automated tests pass.
 - [x] Accept delete-then-rewrite of the same file as a replacement (was wrongly rejected).
+
+## Phase 6 – Nur-ich-Zugang
+- [ ] Passkey-Anmeldung hinzufügen und nur ein Konto (Besitzerin) zulassen; dort alle Features + verbundener API-Key
