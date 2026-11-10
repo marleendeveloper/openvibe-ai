@@ -9,6 +9,7 @@ export async function streamChat(opts: {
   messages: ChatMsg[];
   temperature?: number;
   maxTokens?: number;
+  zeroCostOnly?: boolean;
   signal?: AbortSignal;
   onToken: (t: string) => void;
 }): Promise<string> {
@@ -25,6 +26,7 @@ export async function streamChat(opts: {
       stream: true,
       temperature: opts.temperature ?? 0.4,
       max_tokens: opts.maxTokens ?? 8192,
+      zeroCostOnly: opts.zeroCostOnly ?? true,
     }),
   });
   if (!res.ok || !res.body) {

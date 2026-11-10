@@ -16,7 +16,7 @@ export function recommendedFreeModel(models: ModelInfo[]): string | undefined {
 }
 
 export function hasZeroPricing(pricing: Record<string, unknown> | undefined): boolean {
-  if (!pricing || pricing.prompt === undefined || pricing.completion === undefined) return false;
+  if (!pricing || pricing["prompt"] === undefined || pricing["completion"] === undefined) return false;
   return Object.values(pricing).every((value) => (typeof value === "string" || typeof value === "number") && Number.isFinite(Number(value)) && Number(value) === 0);
 }
 

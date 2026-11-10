@@ -75,7 +75,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <input className="field font-mono" list="models" value={s.model} onChange={(e) => setSettings({ model: e.target.value })} />
             <datalist id="models">{modelIds.map((m) => <option key={m} value={m} />)}</datalist>
           </label>
-          {s.provider === "openrouter" && status?.recommendedModel && <Btn variant="outline" onClick={() => setSettings({ model: status.recommendedModel })}>Kostenloses Coding-Modell wählen</Btn>}
+          {s.provider === "openrouter" && status?.recommendedModel && <Btn variant="outline" onClick={() => { if (status.recommendedModel) setSettings({ model: status.recommendedModel }); }}>Kostenloses Coding-Modell wählen</Btn>}
           <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={s.zeroCostOnly} onChange={(e) => setSettings({ zeroCostOnly: e.target.checked })} /> 0€-Schutz · nur aktuell vollständig kostenlose Modelle</label>
           <div className="flex items-center gap-2">
             {s.provider === "openrouter" && <label className="flex flex-1 items-center gap-2 text-xs"><input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} /> Nur aktuell ohne Tokenpreis</label>}

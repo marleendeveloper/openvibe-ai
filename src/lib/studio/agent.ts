@@ -59,7 +59,7 @@ export async function runAgent(prompt: string): Promise<void> {
       const messages: ChatMsg[] = [{ role: "system", content: sys }, ...history, { role: "user", content: userContent }];
       if (byteSize(JSON.stringify(messages)) > LIMITS.requestBytes - 2000) throw new Error("Projekt und Chat sind zu groß. Chat leeren oder Projekt verkleinern.");
       let acc = "";
-      await streamChat({ provider: s.provider, model: s.model, temperature: s.temperature, maxTokens: s.maxTokens, signal: activeController.signal, messages,
+      await streamChat({ provider: s.provider, model: s.model, temperature: s.temperature, maxTokens: s.maxTokens, zeroCostOnly: s.zeroCostOnly, signal: activeController.signal, messages,
         onToken: (t) => { acc += t; useStudio.getState().updateMessage(aid, { content: acc }, projectId); },
       });
       if (!agent) { rt.step("Antwort abgeschlossen"); break; }
