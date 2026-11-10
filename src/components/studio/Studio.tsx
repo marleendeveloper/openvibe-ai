@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Folder, MessageSquare, Code2, Play, Settings as Cog, KeyRound, ShieldCheck } from "lucide-react";
+import { Folder, MessageSquare, Code2, Play, Settings as Cog, KeyRound, ShieldCheck, UserRound } from "lucide-react";
 import { useStudio } from "@/lib/studio/store";
 import { FileTree } from "./FileTree";
 import { Chat } from "./Chat";
@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 import { useRuntime } from "@/lib/studio/runtime";
 import { loadProvider } from "@/lib/studio/provider-client";
 import { CodeReview } from "./CodeReview";
+import { Account } from "./Account";
+import { useAccount } from "@/lib/studio/auth-state";
 
 type Tab = "files" | "chat" | "code" | "preview";
 
@@ -19,6 +21,8 @@ export default function Studio() {
   const [rightTab, setRightTab] = useState<"preview" | "code">("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const { user } = useAccount();
   const { settings } = useStudio();
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
   useEffect(() => {
@@ -45,6 +49,7 @@ export default function Studio() {
       <span className="shrink-0 font-mono text-sm font-bold"><span className="text-primary">▲</span> OpenVibe</span>
       <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">· {settings.model}</span>
       <div className="ml-auto flex items-center gap-1">
+        <Btn title={user ? "Mein Profil" : "Anmelden / Registrieren"} onClick={() => setAccountOpen(true)} className={cn(user && "text-primary")}><UserRound size={17} /></Btn>
         <Btn title="Code prüfen" onClick={() => setReviewOpen(true)}><ShieldCheck size={17} /></Btn>
         {!hasKey && <Btn variant="primary" onClick={() => setSettingsOpen(true)}><KeyRound size={14} /> API-Key setzen</Btn>}
         <Btn title="Einstellungen" onClick={() => setSettingsOpen(true)}><Cog size={17} /></Btn>
@@ -72,6 +77,7 @@ export default function Studio() {
         </div>
         {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
         {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
+        {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
       </div>
     );
   }
@@ -100,6 +106,7 @@ export default function Studio() {
       </nav>
       {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
       {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
+      {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
     </div>
   );
 }
