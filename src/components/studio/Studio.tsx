@@ -14,6 +14,8 @@ import { CodeReview } from "./CodeReview";
 import { Account } from "./Account";
 import { Publish } from "./Publish";
 import { useAccount } from "@/lib/studio/auth-state";
+import { useServerFn } from "@tanstack/react-start";
+import { autoConnectSavedOpenRouter, AUTO_KEY_EMAILS } from "@/lib/studio/saved-provider.functions";
 
 type Tab = "files" | "chat" | "code" | "preview";
 
@@ -37,6 +39,17 @@ export default function Studio() {
     }).catch(() => undefined);
     return () => { active = false; };
   }, [settings.provider]);
+  const autoConnect = useServerFn(autoConnectSavedOpenRouter);
+  useEffect(() => {
+    const email = user?.email?.toLowerCase();
+    if (!email || !AUTO_KEY_EMAILS.includes(email) || hasKey) return;
+    autoConnect().then(async (r) => {
+      if (!r.configured) return;
+      useStudio.getState().setSettings({ provider: "openrouter", model: "nvidia/nemotron-3-ultra-550b-a55b:free", zeroCostOnly: true });
+      const status = await loadProvider("openrouter");
+      useRuntime.getState().setConnected("openrouter", status.configured);
+    }).catch(() => undefined);
+  }, [user?.email, hasKey, autoConnect]);
   const [isDesktop, setIsDesktop] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
