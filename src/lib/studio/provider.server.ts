@@ -145,5 +145,5 @@ export async function assertZeroCostModel(provider: ProviderId, model: string, e
 export function routeError(error: unknown) {
   const message = error instanceof Error ? error.message : "Anfrage fehlgeschlagen.";
   const status = message === "owner" ? 403 : message === "origin" ? 403 : message === "size" ? 413 : error instanceof z.ZodError || error instanceof SyntaxError ? 400 : 502;
-  return Response.json({ error: message === "owner" ? "Nur die Besitzerin dieses Studios darf die KI nutzen." : message === "origin" ? "Nur Anfragen von diesem Studio erlaubt." : message === "size" ? "Anfrage ist zu groß." : message }, { status, headers: { "cache-control": "no-store" } });
+  return Response.json({ error: message === "owner" ? "Nur der Entwickler der KI darf dieses Studio nutzen." : message === "origin" ? "Nur Anfragen von diesem Studio erlaubt." : message === "size" ? "Anfrage ist zu groß." : message }, { status, headers: { "cache-control": "no-store" } });
 }

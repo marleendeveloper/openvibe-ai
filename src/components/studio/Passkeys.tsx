@@ -50,7 +50,7 @@ export function OwnerGate() {
         <div className="mx-auto grid size-16 place-items-center rounded-2xl brand-gradient text-primary-foreground glow"><Fingerprint size={30} /></div>
         <div>
           <h1 className="text-2xl font-extrabold uppercase tracking-[0.2em]">OpenVibe</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Privates Studio. Nur für die Besitzerin.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Privates Studio. Nur für den Entwickler der KI.</p>
         </div>
         {user && !isOwnerEmail(user.email) ? (
           <div className="space-y-3 rounded-xl border bg-card p-4 text-sm">
