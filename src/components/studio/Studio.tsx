@@ -15,6 +15,8 @@ import { Account } from "./Account";
 import { Publish } from "./Publish";
 import { Overview } from "./Overview";
 import { useAccount } from "@/lib/studio/auth-state";
+import { OwnerGate } from "./Passkeys";
+import { isOwnerEmail } from "@/lib/studio/owner";
 import { useServerFn } from "@tanstack/react-start";
 import { autoConnectSavedOpenRouter, AUTO_KEY_EMAILS } from "@/lib/studio/saved-provider.functions";
 
@@ -28,7 +30,7 @@ export default function Studio() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
-  const { user } = useAccount();
+  const { user, loading } = useAccount();
   const { settings } = useStudio();
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
   useEffect(() => {
@@ -60,6 +62,9 @@ export default function Studio() {
     mq.addEventListener("change", f);
     return () => mq.removeEventListener("change", f);
   }, []);
+
+  if (loading) return <div className="grid h-dvh place-items-center font-mono text-sm text-primary">openvibe://booting…</div>;
+  if (!user || !isOwnerEmail(user.email)) return <OwnerGate />;
 
   const header = (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-panel/80 px-3 backdrop-blur">
