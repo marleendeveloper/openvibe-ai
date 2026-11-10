@@ -59,5 +59,5 @@
 
 ## Qualitätsprogramm Phase A
 - [x] A.1 „Erneut versuchen“ setzt beim fehlgeschlagenen Plan-Schritt fort (Mock-Tests, nicht real im Studio geprüft)
-- [ ] A.3 Retry-Test mit Mock-Stream, der einmal abbricht
+- [x] A.3 Retry-Test mit Mock-Stream, der einmal abbricht; Teilantworten nicht mehr als Kontext gesendet (nur Mock)
 - [ ] Echter Fortsetzungstest mit Nemotron (braucht Anmeldung als Marleen oder Justin)

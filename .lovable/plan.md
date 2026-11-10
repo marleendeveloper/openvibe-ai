@@ -79,3 +79,11 @@ Phase A, Punkt 1: Den Plan und den Index des fehlgeschlagenen Schritts in der Na
 - **Belege (ausgeführt):** `vitest run`: 11 Dateien, 81 Tests bestanden (neu 5, alle Mock-Tests mit gemocktem Stream). `tsgo -b --noEmit`: 0 Fehler. `vite build`: Exit 0. `eslint` auf geänderten Dateien: nur Prettier-Formatfehler, die schon vorher bestanden (alte agent.ts: 75).
 - **Nicht getestet:** echter Abbruch mit Nemotron und Fortsetzung im Studio; Klick auf den neuen Knopf im Browser. Echte Provider-Tests: 0.
 - **Restrisiko:** Wurde Schritt N vor dem Abbruch teilweise angewendet (z. B. Reparatur scheiterte), läuft Schritt N bei Fortsetzung auf dem aktuellen Stand erneut.
+
+## 8. Umsetzung Phase A.3 (10.11.2026, ~17:15 UTC)
+
+- **Geändert:** `agent.ts` (Verlauf für das Modell schließt Nachrichten mit Fehler aus, d. h. abgebrochene Teilantworten werden nie wieder als Kontext gesendet; Projekt-ID- und Revision-Pinning unverändert), neu `retry.test.ts`, `resume.test.ts` nur per Prettier formatiert.
+- **Befund vorher:** Ja, fehlgeschlagene Teilantworten (mit `error`) gingen bei Resume und normalem Neuversuch als Assistant-Kontext an das Modell. Der neue Test schlug ohne den Fix nachweislich fehl (1 failed) und besteht mit ihm.
+- **Mock-Tests (echter `streamChat`-SSE-Parser, `fetch` gemockt):** Abbruch nach Teil-Tokens -> „Neuer Versuch 1/2“, Teil-Datei wird nicht angewendet, zweiter Versuch: genau 1 Dateioperation und 1 Snapshot; zwei fehlgeschlagene Neuversuche -> 3 Anfragen, klare Fehlermeldung, Dateien unverändert; manueller Stopp -> 1 Anfrage, kein Neuversuch, „Abgebrochen.“; kein Teilantwort-Kontext in der Folgeanfrage.
+- **Ergebnisse:** `vitest run` 12 Dateien, 85 Tests bestanden. `tsgo -b --noEmit` 0 Fehler. `vite build` Exit 0. ESLint pro geänderter Datei vs. Git-HEAD (HEAD enthält bereits A.1): agent.ts 75/75, store.ts 24/24, Chat.tsx 61/61, alles vorbestehende Prettier-Formatfehler, 0 neue; neue Testdateien 0 Fehler nach `--fix`. Vollständiger `eslint .` nicht ausgeführt (lief früher >200 s ohne Ergebnis).
+- **Nicht getestet:** echter Abbruch bei Nemotron/OpenRouter, Browserlauf. Echte Provider-Tests: 0.
