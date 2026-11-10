@@ -46,12 +46,16 @@ export function Preview() {
   const busy = useRuntime((s) => s.busy);
   const revision = useMemo(() => filesRevision(project.files), [project.files]);
 
-  let deps: Record<string, string> = {};
-  try { deps = JSON.parse(project.files["/package.json"] ?? "{}").dependencies ?? {}; } catch { /* invalid json */ }
-  const files = Object.fromEntries(Object.entries(project.files).filter(([p]) => p !== "/package.json"));
+  const customSetup = useMemo(() => {
+    let dependencies: Record<string, string> = {};
+    try { dependencies = JSON.parse(project.files["/package.json"] ?? "{}").dependencies ?? {}; } catch { /* invalid json reported by generated application */ }
+    return { dependencies };
+  }, [project.files["/package.json"]]);
+  const files = useMemo(() => Object.fromEntries(Object.entries(project.files).filter(([p]) => p !== "/package.json")), [project.files]);
+  const options = useMemo(() => ({ initMode: "immediate" as const, recompileMode: "delayed" as const, recompileDelay: 400 }), []);
 
   return (
-    <SandpackProvider key={project.id + k + JSON.stringify(deps)} template="react-ts" files={files} customSetup={{ dependencies: deps }} theme="dark" options={{ recompileMode: "delayed", recompileDelay: 400 }}>
+    <SandpackProvider key={project.id + k + JSON.stringify(customSetup)} template="react-ts" files={files} customSetup={customSetup} theme="dark" options={options}>
       <Listener projectId={project.id} revision={revision} />
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-1 border-b px-2 py-1.5">
