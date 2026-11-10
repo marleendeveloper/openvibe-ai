@@ -19,13 +19,15 @@ export async function pushProject(project: Project): Promise<string> {
 /** Lädt ein Cloud-Projekt inklusive Chat-Verlauf in das Studio. */
 export async function pullProject(cloudId: string): Promise<void> {
   const data = await loadCloudProject({ data: { cloudId } });
-  const messages: Message[] = data.messages.map((m, i) => ({
-    id: uid() + i,
-    role: m.role as Message["role"],
-    content: m.content,
-    ops: (m.ops as Message["ops"]) ?? undefined,
-    opsStatus: m.ops?.length ? "applied" : undefined,
-  }));
+  const messages: Message[] = data.messages.map((m, i) => {
+    const ops = Array.isArray(m.ops) ? (m.ops as Message["ops"]) : undefined;
+    const msg: Message = { id: uid() + i, role: m.role as Message["role"], content: m.content };
+    if (ops?.length) {
+      msg.ops = ops;
+      msg.opsStatus = "applied";
+    }
+    return msg;
+  });
   useStudio.getState().importCloudProject({ cloudId: data.id, name: data.name, files: data.files as Record<string, string>, messages });
 }
 
