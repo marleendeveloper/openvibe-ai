@@ -41,3 +41,10 @@
 # Phase 4
 
 - [ ] Define scope. Blocker: no Phase 4 brief from the user yet.
+
+# End-to-end brief (real Nemotron, mobile)
+
+- [x] Multi-file generation + delete applied, preview rendered.
+- [x] Real repair after broken first version: Nemotron created missing file, preview fixed.
+- [x] Undo restores previous state; 48 automated tests pass.
+- [x] Accept delete-then-rewrite of the same file as a replacement (was wrongly rejected).
