@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as ApiPublicAiRouteImport } from './routes/api/public/ai'
 import { Route as ApiPublicProviderRouteImport } from './routes/api/public/provider'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicAiRoute = ApiPublicAiRouteImport.update({
@@ -31,30 +37,39 @@ const ApiPublicProviderRoute = ApiPublicProviderRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/ai': typeof ApiPublicAiRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/ai': typeof ApiPublicAiRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/api/public/ai': typeof ApiPublicAiRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/ai' | '/api/public/provider'
+  fullPaths: '/' | '/reset-password' | '/api/public/ai' | '/api/public/provider'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/ai' | '/api/public/provider'
-  id: '__root__' | '/' | '/api/public/ai' | '/api/public/provider'
+  to: '/' | '/reset-password' | '/api/public/ai' | '/api/public/provider'
+  id:
+    | '__root__'
+    | '/'
+    | '/reset-password'
+    | '/api/public/ai'
+    | '/api/public/provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiPublicAiRoute: typeof ApiPublicAiRoute
   ApiPublicProviderRoute: typeof ApiPublicProviderRoute
 }
@@ -66,6 +81,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/ai': {
@@ -87,6 +109,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiPublicAiRoute: ApiPublicAiRoute,
   ApiPublicProviderRoute: ApiPublicProviderRoute,
 }
