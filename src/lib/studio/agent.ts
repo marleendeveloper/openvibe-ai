@@ -242,6 +242,12 @@ export async function runAgent(
         }
         const clean = acc.replace(/<think>[\s\S]*?(<\/think>|$)/g, "");
         const ops = parseFileOps(clean);
+        // In a multi-step plan the model may report that an earlier step already covered this one.
+        // Continue with a visible note instead of claiming file changes; empty replies still fail.
+        if (!ops.length && steps.length > 1 && !attempt && clean.trim()) {
+          rt.step(stepLabel + "Keine Dateiänderungen nötig (laut Modell)");
+          break;
+        }
         if (!ops.length)
           throw new Error(
             "Keine vollständigen Dateiänderungen erhalten. Es wurde nichts angewendet.",
