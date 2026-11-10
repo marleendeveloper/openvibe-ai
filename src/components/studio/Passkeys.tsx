@@ -7,6 +7,7 @@ import { passkeyLoginOptions, passkeyLoginVerify, passkeyRegisterOptions, passke
 import { isOwnerEmail } from "@/lib/studio/owner";
 import { useAccount } from "@/lib/studio/auth-state";
 import { Btn } from "./ui";
+import { oauthReturnPath } from "@/lib/oauth-return-path";
 
 const inFrame = () => { try { return window.self !== window.top; } catch { return true; } };
 const msg = (e: unknown) => (e instanceof Error && e.name === "NotAllowedError" ? "Passkey abgebrochen." : e instanceof Error ? e.message : "Vorgang fehlgeschlagen.");
@@ -37,7 +38,7 @@ export function OwnerGate() {
     e.preventDefault(); setBusy(true); setError("");
     try {
       if (isOwnerEmail(email)) {
-        const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false, emailRedirectTo: window.location.origin } });
+        const { error } = await supabase.auth.signInWithOtp({ email: email.trim().toLowerCase(), options: { shouldCreateUser: false, emailRedirectTo: new URL(oauthReturnPath(window.location.pathname + window.location.search), window.location.origin).href } });
         if (error) throw error;
       }
       setNotice("Falls diese E-Mail Zugriff hat, kommt gleich ein Anmeldelink.");

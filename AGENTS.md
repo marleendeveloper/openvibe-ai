@@ -41,3 +41,4 @@ use the editor.
 - Keep one root account-session provider for account, studio and review state; private profiles are scoped to authenticated user IDs and signup triggers, while project code remains local.
 - The studio is single-owner: every server function uses `requireOwner`, the AI/provider routes call `assertOwnerRequest`, and signups are disabled, so no other account can use features or the linked key.
 - Passkeys use SimpleWebAuthn in server functions with challenges in an encrypted short-lived session; a verified owner passkey is exchanged for a one-time magic-link token hash, because Cloud auth has no native passkey sign-in.
+- MCP server lives in `src/lib/mcp/` (OAuth via managed auth issuer, owner-email check in `supabaseForUser`, read-only tools) and is mounted under `/api/public/mcp` because the app is published privately.

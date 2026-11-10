@@ -12,8 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PSlugRouteImport } from './routes/p/$slug'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicAiRouteImport } from './routes/api/public/ai'
+import { Route as ApiPublicMcpRouteImport } from './routes/api/public/mcp'
 import { Route as ApiPublicProviderRouteImport } from './routes/api/public/provider'
+import { Route as ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/api/public/[.well-known]/oauth-protected-resource'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -30,9 +33,19 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAiRoute = ApiPublicAiRouteImport.update({
   id: '/api/public/ai',
   path: '/api/public/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicMcpRoute = ApiPublicMcpRouteImport.update({
+  id: '/api/public/mcp',
+  path: '/api/public/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicProviderRoute = ApiPublicProviderRouteImport.update({
@@ -40,28 +53,43 @@ const ApiPublicProviderRoute = ApiPublicProviderRouteImport.update({
   path: '/api/public/provider',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute =
+  ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/api/public/.well-known/oauth-protected-resource',
+    path: '/api/public/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/p/$slug': typeof PSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
+  '/api/public/.well-known/oauth-protected-resource': typeof ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/p/$slug': typeof PSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
+  '/api/public/.well-known/oauth-protected-resource': typeof ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
   '/p/$slug': typeof PSlugRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/mcp': typeof ApiPublicMcpRoute
   '/api/public/provider': typeof ApiPublicProviderRoute
+  '/api/public/.well-known/oauth-protected-resource': typeof ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -69,30 +97,42 @@ export interface FileRouteTypes {
     | '/'
     | '/reset-password'
     | '/p/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/public/ai'
+    | '/api/public/mcp'
     | '/api/public/provider'
+    | '/api/public/.well-known/oauth-protected-resource'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/reset-password'
     | '/p/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/public/ai'
+    | '/api/public/mcp'
     | '/api/public/provider'
+    | '/api/public/.well-known/oauth-protected-resource'
   id:
     | '__root__'
     | '/'
     | '/reset-password'
     | '/p/$slug'
+    | '/.lovable/oauth/consent'
     | '/api/public/ai'
+    | '/api/public/mcp'
     | '/api/public/provider'
+    | '/api/public/.well-known/oauth-protected-resource'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   PSlugRoute: typeof PSlugRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   ApiPublicAiRoute: typeof ApiPublicAiRoute
+  ApiPublicMcpRoute: typeof ApiPublicMcpRoute
   ApiPublicProviderRoute: typeof ApiPublicProviderRoute
+  ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute: typeof ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -118,11 +158,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/ai': {
       id: '/api/public/ai'
       path: '/api/public/ai'
       fullPath: '/api/public/ai'
       preLoaderRoute: typeof ApiPublicAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/mcp': {
+      id: '/api/public/mcp'
+      path: '/api/public/mcp'
+      fullPath: '/api/public/mcp'
+      preLoaderRoute: typeof ApiPublicMcpRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/provider': {
@@ -132,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicProviderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/.well-known/oauth-protected-resource': {
+      id: '/api/public/.well-known/oauth-protected-resource'
+      path: '/api/public/.well-known/oauth-protected-resource'
+      fullPath: '/api/public/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -139,8 +200,12 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   PSlugRoute: PSlugRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   ApiPublicAiRoute: ApiPublicAiRoute,
+  ApiPublicMcpRoute: ApiPublicMcpRoute,
   ApiPublicProviderRoute: ApiPublicProviderRoute,
+  ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute:
+    ApiPublicChar91DotwellKnownChar93OauthProtectedResourceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

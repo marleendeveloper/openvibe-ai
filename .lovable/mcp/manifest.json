@@ -1,0 +1,87 @@
+{
+  "version": 1,
+  "sdk_version": "3.4.0",
+  "path": "/api/public/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://sqcxydpuhuwbsgehfqsd.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "pixel-perfect-replay",
+      "version": "0.1.0",
+      "title": "Pixel Perfect Replay"
+    },
+    "tools": [
+      {
+        "name": "list_projects",
+        "title": "Projekte auflisten",
+        "description": "List the projects saved in the signed-in owner's studio account.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_project",
+        "title": "Projekt lesen",
+        "description": "Read the files of one saved project, optionally a single file.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {
+            "project_id": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$",
+              "description": "Project id from list_projects."
+            },
+            "path": {
+              "description": "Optional file path, e.g. /App.tsx.",
+              "type": "string",
+              "maxLength": 300
+            }
+          },
+          "required": [
+            "project_id"
+          ],
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_published_apps",
+        "title": "Veröffentlichte Apps",
+        "description": "List the owner's published apps with their public link names.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "https://json-schema.org/draft/2020-12/schema",
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
