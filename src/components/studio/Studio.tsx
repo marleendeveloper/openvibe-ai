@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Folder, MessageSquare, Code2, Play, Settings as Cog, KeyRound, ShieldCheck, UserRound, Globe } from "lucide-react";
+import { Folder, MessageSquare, Code2, Play, Settings as Cog, KeyRound, ShieldCheck, UserRound, Globe, LayoutGrid } from "lucide-react";
 import { useStudio } from "@/lib/studio/store";
 import { FileTree } from "./FileTree";
 import { Chat } from "./Chat";
@@ -13,6 +13,7 @@ import { loadProvider } from "@/lib/studio/provider-client";
 import { CodeReview } from "./CodeReview";
 import { Account } from "./Account";
 import { Publish } from "./Publish";
+import { Overview } from "./Overview";
 import { useAccount } from "@/lib/studio/auth-state";
 import { useServerFn } from "@tanstack/react-start";
 import { autoConnectSavedOpenRouter, AUTO_KEY_EMAILS } from "@/lib/studio/saved-provider.functions";
@@ -26,6 +27,7 @@ export default function Studio() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
+  const [overviewOpen, setOverviewOpen] = useState(false);
   const { user } = useAccount();
   const { settings } = useStudio();
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
@@ -65,6 +67,7 @@ export default function Studio() {
       <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">· {settings.model}</span>
       <div className="ml-auto flex items-center gap-1">
         <Btn title={user ? "Mein Profil" : "Anmelden / Registrieren"} onClick={() => setAccountOpen(true)} className={cn(user && "text-primary")}><UserRound size={17} /></Btn>
+        <Btn title="Projekt-Übersicht" onClick={() => setOverviewOpen(true)}><LayoutGrid size={17} /></Btn>
         <Btn title="Code prüfen" onClick={() => setReviewOpen(true)}><ShieldCheck size={17} /></Btn>
         <Btn title="App veröffentlichen" onClick={() => setPublishOpen(true)}><Globe size={17} /></Btn>
         {!hasKey && <Btn variant="primary" onClick={() => setSettingsOpen(true)}><KeyRound size={14} /><span className="whitespace-nowrap"><span className="hidden sm:inline">API-</span>Key</span></Btn>}
@@ -95,6 +98,7 @@ export default function Studio() {
         {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
         {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
         {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
+        {overviewOpen && <Overview onClose={() => setOverviewOpen(false)} onSignIn={() => { setOverviewOpen(false); setAccountOpen(true); }} />}
       </div>
     );
   }
@@ -125,6 +129,7 @@ export default function Studio() {
       {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
       {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
       {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
+        {overviewOpen && <Overview onClose={() => setOverviewOpen(false)} onSignIn={() => { setOverviewOpen(false); setAccountOpen(true); }} />}
     </div>
   );
 }

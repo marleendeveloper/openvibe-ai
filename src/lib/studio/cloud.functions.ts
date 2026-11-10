@@ -110,3 +110,26 @@ export const loadPublishedApp = createServerFn({ method: "GET" })
     if (!app) return null;
     return app;
   });
+
+/** Übersicht: alle Kontoprojekte mit Veröffentlichung und Verlaufsstatistik. */
+export const projectOverview = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const [{ data: projects, error }, { data: pubs, error: pubError }, { data: msgs, error: msgError }] = await Promise.all([
+      sb.from("projects").select("id,name,files,updated_at").eq("user_id", context.userId).order("updated_at", { ascending: false }),
+      sb.from("published_apps").select("project_id,slug,title,published_at").eq("user_id", context.userId),
+      sb.from("project_messages").select("project_id,role,content,created_at").order("created_at", { ascending: true }).limit(2000),
+    ]);
+    if (error || pubError || msgError) throw new Error("Übersicht konnte nicht geladen werden.");
+    return (projects ?? []).map((p) => {
+      const own = (msgs ?? []).filter((m) => m.project_id === p.id);
+      const pub = (pubs ?? []).find((x) => x.project_id === p.id);
+      return {
+        id: p.id, name: p.name, updatedAt: p.updated_at,
+        fileCount: Object.keys((p.files as Record<string, string>) ?? {}).length,
+        messages: own.map((m) => ({ role: m.role, content: String(m.content).replace(/<think>[\s\S]*?<\/think>/g, "").replace(/<file[\s\S]*?<\/file>/g, "").trim().slice(0, 400), createdAt: m.created_at })),
+        publication: pub ? { slug: pub.slug, title: pub.title, publishedAt: pub.published_at } : null,
+      };
+    });
+  });
