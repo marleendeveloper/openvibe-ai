@@ -226,7 +226,16 @@ export const useStudio = create<State>()(
         updateMessage: (id, patch, projectId) =>
           patchCurrent((p) => ({ ...p, messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)) }), projectId),
         clearChat: () => patchCurrent((p) => ({ ...p, messages: [] })),
-        setCloudId: (id, cloudId) => set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, cloudId } : p)) })),
+        setCloudId: (id, cloudId) =>
+          set((s) => ({
+            projects: s.projects.map((p) => {
+              if (p.id !== id) return p;
+              const next = { ...p };
+              if (cloudId) next.cloudId = cloudId;
+              else delete next.cloudId;
+              return next;
+            }),
+          })),
         importCloudProject: (p) => {
           const files = validateFiles(p.files);
           set((s) => {
