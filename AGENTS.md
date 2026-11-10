@@ -39,3 +39,5 @@ use the editor.
 - Keep code review separate from external-provider coding: authenticated server functions call the AI Gateway SDK, review only consented files, pin reports to project revisions, and never automatically apply suggestions.
 - Activate saved workspace provider credentials only through authenticated server actions that issue encrypted browser-scoped cookies; never return the credential or expose it to public AI requests without the cookie.
 - Keep one root account-session provider for account, studio and review state; private profiles are scoped to authenticated user IDs and signup triggers, while project code remains local.
+- The studio is single-owner: every server function uses `requireOwner`, the AI/provider routes call `assertOwnerRequest`, and signups are disabled, so no other account can use features or the linked key.
+- Passkeys use SimpleWebAuthn in server functions with challenges in an encrypted short-lived session; a verified owner passkey is exchanged for a one-time magic-link token hash, because Cloud auth has no native passkey sign-in.
