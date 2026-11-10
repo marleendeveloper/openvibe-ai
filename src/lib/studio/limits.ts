@@ -15,10 +15,10 @@ export const byteSize = (text: string) => new TextEncoder().encode(text).length;
 export function safePath(input: string): string {
   const path = input.trim().replace(/\\/g, "/");
   const parts = path.replace(/^\//, "").split("/");
-  // eslint-disable-next-line no-control-regex -- control characters are deliberately rejected
   if (
     !path ||
     path.length > 240 ||
+    // eslint-disable-next-line no-control-regex -- control characters are deliberately rejected
     /[\x00-\x1f<>:"|?*]/.test(path) ||
     parts.some((p) => !p || p === "." || p === ".." || p === ".git" || p === "node_modules") ||
     parts.some((p) => /^\.env(?:\.|$)/.test(p))

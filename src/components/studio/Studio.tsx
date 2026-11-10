@@ -66,13 +66,11 @@ export default function Studio() {
     autoConnect()
       .then(async (r) => {
         if (!r.configured) return;
-        useStudio
-          .getState()
-          .setSettings({
-            provider: "openrouter",
-            model: "nvidia/nemotron-3-ultra-550b-a55b:free",
-            zeroCostOnly: true,
-          });
+        useStudio.getState().setSettings({
+          provider: "openrouter",
+          model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+          zeroCostOnly: true,
+        });
         const status = await loadProvider("openrouter");
         useRuntime.getState().setConnected("openrouter", status.configured);
       })

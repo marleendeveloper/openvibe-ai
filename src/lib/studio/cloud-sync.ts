@@ -46,14 +46,12 @@ export async function pullProject(cloudId: string): Promise<void> {
     }
     return msg;
   });
-  useStudio
-    .getState()
-    .importCloudProject({
-      cloudId: data.id,
-      name: data.name,
-      files: data.files as Record<string, string>,
-      messages,
-    });
+  useStudio.getState().importCloudProject({
+    cloudId: data.id,
+    name: data.name,
+    files: data.files as Record<string, string>,
+    messages,
+  });
 }
 
 export async function listProjects() {

@@ -72,17 +72,15 @@ export const passkeyRegisterVerify = createServerFn({ method: "POST" })
       throw new Error("Passkey konnte nicht bestätigt werden.");
     const cred = v.registrationInfo.credential;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("passkeys")
-      .insert({
-        user_id: context.userId,
-        credential_id: cred.id,
-        public_key: isoBase64URL.fromBuffer(cred.publicKey),
-        counter: cred.counter,
-        transports: cred.transports ?? [],
-        rp_id: rpID,
-        label: data.label,
-      });
+    const { error } = await supabaseAdmin.from("passkeys").insert({
+      user_id: context.userId,
+      credential_id: cred.id,
+      public_key: isoBase64URL.fromBuffer(cred.publicKey),
+      counter: cred.counter,
+      transports: cred.transports ?? [],
+      rp_id: rpID,
+      label: data.label,
+    });
     if (error) throw new Error("Passkey konnte nicht gespeichert werden.");
     return { ok: true };
   });

@@ -25,16 +25,14 @@ function sse(text: string, ending = "[DONE]") {
 }
 beforeEach(() => {
   useStudio.getState().createProject("Test", { ...DEFAULT_FILES, "/old.ts": "old" });
-  useStudio
-    .getState()
-    .setSettings({
-      provider: "openrouter",
-      model: "test/model",
-      shareProject: true,
-      autoApply: true,
-      autoFix: false,
-      mode: "agent",
-    });
+  useStudio.getState().setSettings({
+    provider: "openrouter",
+    model: "test/model",
+    shareProject: true,
+    autoApply: true,
+    autoFix: false,
+    mode: "agent",
+  });
   useRuntime.setState({ busy: false, preview: null, progress: [], error: null });
 });
 afterEach(() => {
@@ -277,25 +275,21 @@ describe("repair rules", () => {
     await vi.advanceTimersByTimeAsync(100);
     let st = useStudio.getState();
     let p = st.projects.find((p) => p.id === st.currentId);
-    useRuntime
-      .getState()
-      .setPreview({
-        projectId: st.currentId,
-        revision: filesRevision(p?.files ?? {}),
-        status: "error",
-        error: "compile failed",
-      });
+    useRuntime.getState().setPreview({
+      projectId: st.currentId,
+      revision: filesRevision(p?.files ?? {}),
+      status: "error",
+      error: "compile failed",
+    });
     await vi.advanceTimersByTimeAsync(400);
     st = useStudio.getState();
     p = st.projects.find((p) => p.id === st.currentId);
-    useRuntime
-      .getState()
-      .setPreview({
-        projectId: st.currentId,
-        revision: filesRevision(p?.files ?? {}),
-        status: "ready",
-        error: null,
-      });
+    useRuntime.getState().setPreview({
+      projectId: st.currentId,
+      revision: filesRevision(p?.files ?? {}),
+      status: "ready",
+      error: null,
+    });
     await vi.advanceTimersByTimeAsync(2600);
     await pending;
     expect(calls).toBe(2);

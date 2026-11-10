@@ -1,9 +1,9 @@
 export function oauthReturnPath(value: unknown): string {
-  // eslint-disable-next-line no-control-regex -- control characters are deliberately rejected
   if (
     typeof value !== "string" ||
     !value.startsWith("/") ||
     value.startsWith("//") ||
+    // eslint-disable-next-line no-control-regex -- control characters are deliberately rejected
     /[\\\u0000-\u001f\u007f]/.test(value)
   )
     return "/";
