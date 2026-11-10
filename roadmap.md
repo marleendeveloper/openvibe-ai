@@ -24,3 +24,10 @@
 - [x] Test real AI Gateway review service with sample code, review validation, and mobile/desktop selection and sign-in gating.
 - [ ] Complete authenticated in-app review and verify result display. Blocker: there are no auth users; session minting cannot proceed before sign-in.
 - [ ] Use the saved `OPENROUTER_API_KEY` through an authenticated action and run real external coding. Current blocker: no signed-in app user exists for a safe shared-secret test.
+
+# Complete account setup
+
+- [ ] Add email registration, login, confirmation state, password reset and existing social sign-in.
+- [ ] Add a private profile with display name and bio, automatic creation, and own-account access only.
+- [ ] Synchronize session state across studio, review and account controls; clear provider cookies on logout.
+- [ ] Test profile persistence, login/logout and review/OpenRouter flows where authentication is available.
