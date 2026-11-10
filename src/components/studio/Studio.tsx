@@ -54,7 +54,7 @@ export default function Studio() {
         <Btn title={user ? "Mein Profil" : "Anmelden / Registrieren"} onClick={() => setAccountOpen(true)} className={cn(user && "text-primary")}><UserRound size={17} /></Btn>
         <Btn title="Code prüfen" onClick={() => setReviewOpen(true)}><ShieldCheck size={17} /></Btn>
         <Btn title="App veröffentlichen" onClick={() => setPublishOpen(true)}><Globe size={17} /></Btn>
-        {!hasKey && <Btn variant="primary" onClick={() => setSettingsOpen(true)}><KeyRound size={14} /> API-Key setzen</Btn>}
+        {!hasKey && <Btn variant="primary" onClick={() => setSettingsOpen(true)}><KeyRound size={14} /><span className="whitespace-nowrap"><span className="hidden sm:inline">API-</span>Key</span></Btn>}
         <Btn title="Einstellungen" onClick={() => setSettingsOpen(true)}><Cog size={17} /></Btn>
       </div>
     </header>
