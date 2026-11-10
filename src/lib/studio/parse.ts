@@ -14,7 +14,7 @@ export function normalizePath(p: string): string {
 function stripFence(content: string): string {
   let c = content.replace(/^\r?\n/, "");
   const m = c.match(/^\s*```[\w-]*\r?\n([\s\S]*?)\r?\n?```\s*$/);
-  if (m) c = m[1];
+  if (m) c = m[1] ?? "";
   return c.replace(/\s+$/, "") + "\n";
 }
 
@@ -23,7 +23,7 @@ export function parseFileOps(text: string): FileOp[] {
   const re = /<file\s+path=["']([^"']+)["']\s*>([\s\S]*?)<\/file>|<delete\s+path=["']([^"']+)["']\s*\/?>/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
-    if (m[1]) ops.push({ type: "write", path: normalizePath(m[1]), content: stripFence(m[2]) });
+    if (m[1]) ops.push({ type: "write", path: normalizePath(m[1]), content: stripFence(m[2] ?? "") });
     else if (m[3]) ops.push({ type: "delete", path: normalizePath(m[3]) });
   }
   return ops;

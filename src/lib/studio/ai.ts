@@ -17,7 +17,7 @@ export async function streamChat(opts: {
   const viaProxy = PROXY_HOSTS.includes(host);
   const res = await fetch(viaProxy ? "/api/public/ai" : target, {
     method: "POST",
-    signal: opts.signal,
+    signal: opts.signal ?? null,
     headers: {
       "content-type": "application/json",
       authorization: `Bearer ${opts.apiKey}`,

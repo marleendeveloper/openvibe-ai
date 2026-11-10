@@ -28,9 +28,9 @@ export function FileTree({ onOpen }: { onOpen?: () => void }) {
 
   const importFiles = async (list: FileList | null) => {
     if (!list?.length) return;
-    if (list.length === 1 && list[0].name.endsWith(".json")) {
+    if (list.length === 1 && list[0]!.name.endsWith(".json")) {
       try {
-        const j = JSON.parse(await list[0].text());
+        const j = JSON.parse(await list[0]!.text());
         if (j.files) { createProject(j.name ?? "Import", j.files); return; }
       } catch { /* treat as normal file */ }
     }
