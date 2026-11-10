@@ -9,7 +9,7 @@ export const Route = createFileRoute("/api/public/ai")({
           const data = p.chatSchema.parse(await p.readBoundedBody(request));
           const key = await p.readCredential(data.provider);
           if (!key) return Response.json({ error: "Bitte zuerst den Anbieter in den Einstellungen verbinden." }, { status: 401 });
-          await p.assertZeroCostModel(data.provider, data.model, data.zeroCostOnly);
+          await p.assertZeroCostModel(data.provider, data.model, data.zeroCostOnly, p.hasImages(data.messages));
           const upstream = await p.providerFetch(data.provider, key, "/chat/completions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.provider ? { model: data.model, messages: data.messages, stream: data.stream, temperature: data.temperature, max_tokens: data.max_tokens } : {}), signal: AbortSignal.any([request.signal, AbortSignal.timeout(120000)]) });
           if (!upstream.ok) return upstream;
           const { LIMITS } = await import("@/lib/studio/limits");
