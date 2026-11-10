@@ -1,7 +1,7 @@
 import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { LIMITS, byteSize } from "./limits";
-import { PROVIDERS, providerError, type ProviderId, type ModelInfo } from "./providers";
+import { PROVIDERS, providerError, hasZeroPricing, type ProviderId, type ModelInfo } from "./providers";
 
 export const providerSchema = z.enum(["openrouter", "huggingface", "custom"]);
 export const chatSchema = z.object({
@@ -11,6 +11,7 @@ export const chatSchema = z.object({
   temperature: z.number().min(0).max(1.5).default(0.4),
   max_tokens: z.number().int().min(128).max(LIMITS.maxTokens).default(8192),
   stream: z.boolean().default(true),
+  zeroCostOnly: z.boolean().default(true),
 }).strict();
 
 export function assertSameOrigin(request: Request) {
@@ -97,7 +98,14 @@ export async function modelCatalog(provider: ProviderId, key: string | null): Pr
   if (byteSize(raw) > 10_000_000) throw new Error("Modellkatalog zu groß.");
   const data = JSON.parse(raw).data;
   if (!Array.isArray(data)) throw new Error("Anbieter liefert keinen gültigen Modellkatalog.");
-  return data.filter((m) => typeof m.id === "string").map((m) => ({ id: m.id, name: m.name ?? m.id, context: m.context_length, free: provider === "openrouter" && m.pricing?.prompt !== undefined && m.pricing?.completion !== undefined && Number(m.pricing.prompt) === 0 && Number(m.pricing.completion) === 0 }));
+  return data.filter((m) => typeof m.id === "string").map((m) => ({ id: m.id, name: m.name ?? m.id, context: m.context_length, free: provider === "openrouter" && hasZeroPricing(m.pricing) }));
+}
+
+export async function assertZeroCostModel(provider: ProviderId, model: string, enabled: boolean) {
+  if (!enabled) return;
+  if (provider !== "openrouter") throw new Error("0€-Schutz: Für diesen Anbieter können kostenlose Preise nicht geprüft werden. OpenRouter wählen oder den Schutz bewusst ausschalten.");
+  const catalog = await modelCatalog(provider, null);
+  if (!catalog.some((entry) => entry.id === model && entry.free)) throw new Error("0€-Schutz: Das Modell ist im aktuellen Katalog nicht vollständig kostenlos. Keine KI-Anfrage gesendet.");
 }
 
 export function routeError(error: unknown) {

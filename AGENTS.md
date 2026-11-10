@@ -35,3 +35,4 @@ use the editor.
 - Generic provider base URLs are server-configured, never browser-supplied, to prevent the relay becoming an arbitrary network proxy.
 - Pin every agent task, message, patch and preview check to its original project and file revision; reject stale patches to avoid overwriting concurrent edits.
 - Validate file operations atomically before snapshots and use bounded repair attempts with duplicate-error detection; preview success must match the changed revision.
+- Check live, complete OpenRouter pricing before zero-cost generation and connection tests; never infer free pricing from a model name or fall back to a paid model.
