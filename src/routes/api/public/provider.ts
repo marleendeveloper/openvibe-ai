@@ -22,6 +22,7 @@ export const Route = createFileRoute("/api/public/provider")({
         const data = await p.readBoundedBody(request);
         const provider = p.providerSchema.parse(data.provider);
         if (data.action === "remove") { p.removeCredential(provider); return Response.json({ configured: false }); }
+        if (data.action !== "remove") await p.assertOwnerRequest(request);
         if (data.action === "save") {
           if (typeof data.key !== "string" || data.key.length < 10 || data.key.length > 512 || /\s/.test(data.key)) return Response.json({ error: "Ungültiges Schlüsselformat." }, { status: 400 });
           await p.saveCredential(provider, data.key, request);

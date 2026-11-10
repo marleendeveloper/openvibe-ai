@@ -1,12 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOwner } from "./owner-middleware";
 import { cloudIdSchema, cloudProjectSchema, publishSchema, slugSchema, unpublishSchema } from "./cloud";
 import { validateFiles } from "./limits";
 
 export const saveCloudProject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => cloudProjectSchema.parse(input))
   .handler(async ({ data, context }) => {
     const files = validateFiles(data.files);
@@ -28,7 +28,7 @@ export const saveCloudProject = createServerFn({ method: "POST" })
   });
 
 export const listCloudProjects = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .handler(async ({ context }) => {
     const { data, error } = await context.supabase.from("projects").select("id,name,updated_at").eq("user_id", context.userId).order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -36,7 +36,7 @@ export const listCloudProjects = createServerFn({ method: "GET" })
   });
 
 export const loadCloudProject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => cloudIdSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { data: project, error } = await context.supabase.from("projects").select("id,name,files,updated_at").eq("id", data.cloudId).eq("user_id", context.userId).single();
@@ -47,7 +47,7 @@ export const loadCloudProject = createServerFn({ method: "POST" })
   });
 
 export const deleteCloudProject = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => cloudIdSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("projects").delete().eq("id", data.cloudId).eq("user_id", context.userId);
@@ -56,7 +56,7 @@ export const deleteCloudProject = createServerFn({ method: "POST" })
   });
 
 export const publishApp = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => publishSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { data: project, error } = await context.supabase.from("projects").select("files").eq("id", data.cloudId).eq("user_id", context.userId).single();
@@ -73,7 +73,7 @@ export const publishApp = createServerFn({ method: "POST" })
   });
 
 export const unpublishApp = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => unpublishSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("published_apps").delete().eq("project_id", data.cloudId).eq("user_id", context.userId);
@@ -82,7 +82,7 @@ export const unpublishApp = createServerFn({ method: "POST" })
   });
 
 export const getPublication = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => cloudIdSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { data: pub, error } = await context.supabase.from("published_apps").select("slug,title,published_at").eq("project_id", data.cloudId).eq("user_id", context.userId).maybeSingle();
@@ -113,7 +113,7 @@ export const loadPublishedApp = createServerFn({ method: "GET" })
 
 /** Übersicht: alle Kontoprojekte mit Veröffentlichung und Verlaufsstatistik. */
 export const projectOverview = createServerFn({ method: "GET" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .handler(async ({ context }) => {
     const sb = context.supabase;
     const [{ data: projects, error }, { data: pubs, error: pubError }, { data: msgs, error: msgError }] = await Promise.all([

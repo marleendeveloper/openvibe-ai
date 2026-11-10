@@ -6,6 +6,7 @@ export const Route = createFileRoute("/api/public/ai")({
         const p = await import("@/lib/studio/provider.server");
         try {
           p.assertSameOrigin(request);
+          await p.assertOwnerRequest(request);
           const data = p.chatSchema.parse(await p.readBoundedBody(request));
           const key = await p.readCredential(data.provider);
           if (!key) return Response.json({ error: "Bitte zuerst den Anbieter in den Einstellungen verbinden." }, { status: 401 });

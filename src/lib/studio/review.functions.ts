@@ -1,9 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOwner } from "./owner-middleware";
 import { reviewInput } from "./review";
 
 export const reviewCode = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .inputValidator((input: unknown) => reviewInput.parse(input))
   .handler(async ({ data }) => {
     const { performReview } = await import("./review.server");

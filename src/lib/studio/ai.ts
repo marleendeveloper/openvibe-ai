@@ -1,5 +1,6 @@
 import type { ProviderId } from "./providers";
 import { LIMITS, byteSize } from "./limits";
+import { ownerHeaders } from "./provider-client";
 
 export type ContentPart = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
 export type ChatMsg = { role: "system" | "user" | "assistant"; content: string | ContentPart[] };
@@ -19,6 +20,7 @@ export async function streamChat(opts: {
     signal: opts.signal ?? null,
     headers: {
       "content-type": "application/json",
+      ...(await ownerHeaders()),
     },
     body: JSON.stringify({
       provider: opts.provider,

@@ -54,4 +54,5 @@
 - [x] Accept delete-then-rewrite of the same file as a replacement (was wrongly rejected).
 
 ## Phase 6 – Nur-ich-Zugang
-- [ ] Passkey-Anmeldung hinzufügen und nur ein Konto (Besitzerin) zulassen; dort alle Features + verbundener API-Key
+- [x] Passkey-Anmeldung hinzufügen und nur ein Konto (Besitzerin) zulassen; dort alle Features + verbundener API-Key
+- [x] Phase 5: Retries, Schrittplan, Bilder, Vorlagen, Startbildschirm, Chat-Design, Animationen

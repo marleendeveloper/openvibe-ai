@@ -15,6 +15,13 @@
       "when": 1794304382223,
       "tag": "0001_cloud_projects_messages_published",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794308913566,
+      "tag": "0002_create_passkeys",
+      "breakpoints": true
     }
   ]
 }

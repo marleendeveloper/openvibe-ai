@@ -21,6 +21,8 @@ export const chatSchema = z.object({
   zeroCostOnly: z.boolean().default(true),
 }).strict();
 
+export { assertOwnerRequest } from "./owner-middleware";
+
 export function assertSameOrigin(request: Request) {
   const origin = request.headers.get("origin");
   const expected = new URL(request.url).origin;
@@ -142,6 +144,6 @@ export async function assertZeroCostModel(provider: ProviderId, model: string, e
 
 export function routeError(error: unknown) {
   const message = error instanceof Error ? error.message : "Anfrage fehlgeschlagen.";
-  const status = message === "origin" ? 403 : message === "size" ? 413 : error instanceof z.ZodError || error instanceof SyntaxError ? 400 : 502;
-  return Response.json({ error: message === "origin" ? "Nur Anfragen von diesem Studio erlaubt." : message === "size" ? "Anfrage ist zu groß." : message }, { status, headers: { "cache-control": "no-store" } });
+  const status = message === "owner" ? 403 : message === "origin" ? 403 : message === "size" ? 413 : error instanceof z.ZodError || error instanceof SyntaxError ? 400 : 502;
+  return Response.json({ error: message === "owner" ? "Nur die Besitzerin dieses Studios darf die KI nutzen." : message === "origin" ? "Nur Anfragen von diesem Studio erlaubt." : message === "size" ? "Anfrage ist zu groß." : message }, { status, headers: { "cache-control": "no-store" } });
 }
