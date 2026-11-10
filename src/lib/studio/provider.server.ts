@@ -76,7 +76,24 @@ export function baseUrl(provider: ProviderId) {
   return configured.replace(/\/+$/, "");
 }
 
+export const GATEWAY_MARKER = "__openvibe_gateway__";
+
 export async function providerFetch(provider: ProviderId, key: string, path: string, init: RequestInit = {}) {
+  if (provider === "openrouter" && key === GATEWAY_MARKER) {
+    const lovable = process.env["LOVABLE_API_KEY"];
+    const connection = process.env["UDC_OPENROUTER_API_KEY"];
+    if (!lovable || !connection) throw new Error("Verknüpfte OpenRouter-Verbindung ist nicht verfügbar.");
+    const headers = new Headers(init.headers);
+    headers.set("authorization", `Bearer ${lovable}`);
+    headers.set("x-connection-api-key", connection);
+    const response = await fetch(`https://connector-gateway.lovable.dev/udc_openrouter${path}`, { ...init, headers, signal: init.signal ?? AbortSignal.timeout(120000) });
+    if (!response.ok) {
+      const detail = await response.text();
+      console.error(`OpenRouter gateway [${response.status}]: ${detail.slice(0, 2000)}`);
+      return new Response(JSON.stringify({ error: providerError(response.status, detail, response.headers.get("retry-after")) }), { status: response.status, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+    }
+    return response;
+  }
   const base = baseUrl(provider);
   if (!base) throw new Error("Der eigene Anbieter benötigt eine serverseitig konfigurierte OPENVIBE_CUSTOM_BASE_URL.");
   const headers = new Headers(init.headers);
