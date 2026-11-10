@@ -55,7 +55,7 @@ export function Preview() {
   const options = useMemo(() => ({ initMode: "immediate" as const, recompileMode: "delayed" as const, recompileDelay: 400 }), []);
 
   return (
-    <SandpackProvider key={project.id + k + JSON.stringify(customSetup)} template="react-ts" files={files} customSetup={customSetup} theme="dark" options={options}>
+    <SandpackProvider key={project.id + k + revision} template="react-ts" files={files} customSetup={customSetup} theme="dark" options={options}>
       <Listener projectId={project.id} revision={revision} />
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-1 border-b px-2 py-1.5">
