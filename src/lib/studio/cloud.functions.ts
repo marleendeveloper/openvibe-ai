@@ -128,7 +128,7 @@ export const projectOverview = createServerFn({ method: "GET" })
       return {
         id: p.id, name: p.name, updatedAt: p.updated_at,
         fileCount: Object.keys((p.files as Record<string, string>) ?? {}).length,
-        messages: own.map((m) => ({ role: m.role, content: String(m.content).slice(0, 400), createdAt: m.created_at })),
+        messages: own.map((m) => ({ role: m.role, content: String(m.content).replace(/<think>[\s\S]*?<\/think>/g, "").replace(/<file[\s\S]*?<\/file>/g, "").trim().slice(0, 400), createdAt: m.created_at })),
         publication: pub ? { slug: pub.slug, title: pub.title, publishedAt: pub.published_at } : null,
       };
     });
