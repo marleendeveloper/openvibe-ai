@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type { ModelInfo } from "@/lib/studio/providers";
+import { recommendedFreeModel } from "@/lib/studio/providers";
 
 export const Route = createFileRoute("/api/public/provider")({
   server: { handlers: {
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/api/public/provider")({
         let models: ModelInfo[] = [];
         let error;
         try { models = await p.modelCatalog(provider, key); } catch (e) { error = (e as Error).message; }
-        return Response.json({ configured: !!key, baseUrl: p.baseUrl(provider), models, error }, { headers: { "cache-control": "no-store" } });
+        return Response.json({ configured: !!key, baseUrl: p.baseUrl(provider), models, recommendedModel: provider === "openrouter" ? recommendedFreeModel(models) : undefined, error }, { headers: { "cache-control": "no-store" } });
       } catch (e) { return p.routeError(e); }
     },
     POST: async ({ request }) => {
@@ -29,6 +30,8 @@ export const Route = createFileRoute("/api/public/provider")({
         if (data.action !== "test" || typeof data.model !== "string" || !data.model || data.model.length > 200) return Response.json({ error: "Ungültiger Verbindungstest." }, { status: 400 });
         const key = await p.readCredential(provider);
         if (!key) return Response.json({ error: "Bitte zuerst einen Schlüssel sicher speichern." }, { status: 401 });
+        if (data.zeroCostOnly !== undefined && typeof data.zeroCostOnly !== "boolean") return Response.json({ error: "Ungültiger Kostenschutz." }, { status: 400 });
+        await p.assertZeroCostModel(provider, data.model, data.zeroCostOnly !== false);
         const response = await p.providerFetch(provider, key, "/chat/completions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ model: data.model, messages: [{ role: "user", content: "Reply with OK." }], max_tokens: 64, stream: false }) });
         if (!response.ok) return response;
         const result = await response.json();

@@ -7,7 +7,7 @@ export async function loadProvider(provider: ProviderId): Promise<ProviderStatus
   return data;
 }
 
-export async function configureProvider(provider: ProviderId, action: "save" | "remove" | "test", extra: { key?: string; model?: string } = {}) {
+export async function configureProvider(provider: ProviderId, action: "save" | "remove" | "test", extra: { key?: string; model?: string; zeroCostOnly?: boolean } = {}) {
   const response = await fetch("/api/public/provider", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ provider, action, ...extra }) });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error ?? `HTTP ${response.status}`);

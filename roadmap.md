@@ -7,3 +7,11 @@
 - [x] Run automated mock tests and desktop/mobile browser checks.
 - [ ] Run real external-provider code generation through the preview. Blocker: this workspace has no linked provider connection or external credentials.
 - [x] Write the final technical report with evidence, security limitations and credit balance (`PHASE2-REPORT.md`).
+
+# Phase 3 — Free coding setup and cost protection
+
+- [x] Select a currently zero-priced external coding model from the live catalog without claiming a proven strongest model.
+- [x] Add a default-on zero-cost guard for OpenRouter generation and connection tests, with no paid fallback.
+- [x] Verify automated rules and desktop/mobile setup through the studio.
+- [ ] Run real external-provider generation. Blocker: no provider-issued credential or accessible connection; an external API key cannot be self-issued or sent in chat.
+- [x] Record results and remaining limitations (`PHASE3-REPORT.md`).

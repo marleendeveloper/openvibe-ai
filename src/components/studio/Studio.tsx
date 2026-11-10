@@ -19,7 +19,16 @@ export default function Studio() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { settings } = useStudio();
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
-  useEffect(() => { loadProvider(settings.provider).then((s) => useRuntime.getState().setConnected(settings.provider, s.configured)).catch(() => undefined); }, [settings.provider]);
+  useEffect(() => {
+    let active = true;
+    loadProvider(settings.provider).then((status) => {
+      if (!active) return;
+      useRuntime.getState().setConnected(settings.provider, status.configured);
+      const current = useStudio.getState().settings;
+      if (current.provider === settings.provider && !current.model && status.recommendedModel) useStudio.getState().setSettings({ model: status.recommendedModel });
+    }).catch(() => undefined);
+    return () => { active = false; };
+  }, [settings.provider]);
   const [isDesktop, setIsDesktop] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");

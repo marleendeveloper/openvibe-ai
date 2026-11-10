@@ -33,7 +33,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
   const action = async (kind: "save" | "remove" | "test") => {
     setWorking(true); setNotice("");
     try {
-      await configureProvider(s.provider, kind, kind === "save" ? { key } : { model: s.model });
+      await configureProvider(s.provider, kind, kind === "save" ? { key } : { model: s.model, zeroCostOnly: s.zeroCostOnly });
       setKey("");
       const result = await loadProvider(s.provider);
       setStatus(result); useRuntime.getState().setConnected(s.provider, result.configured);
@@ -75,6 +75,8 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <input className="field font-mono" list="models" value={s.model} onChange={(e) => setSettings({ model: e.target.value })} />
             <datalist id="models">{modelIds.map((m) => <option key={m} value={m} />)}</datalist>
           </label>
+          {s.provider === "openrouter" && status?.recommendedModel && <Btn variant="outline" onClick={() => { if (status.recommendedModel) setSettings({ model: status.recommendedModel }); }}>Kostenloses Coding-Modell wählen</Btn>}
+          <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={s.zeroCostOnly} onChange={(e) => setSettings({ zeroCostOnly: e.target.checked })} /> 0€-Schutz · nur aktuell vollständig kostenlose Modelle</label>
           <div className="flex items-center gap-2">
             {s.provider === "openrouter" && <label className="flex flex-1 items-center gap-2 text-xs"><input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} /> Nur aktuell ohne Tokenpreis</label>}
             <Btn title="Modellkatalog aktualisieren" disabled={working} onClick={() => void refresh()}><RefreshCw size={14} /></Btn>

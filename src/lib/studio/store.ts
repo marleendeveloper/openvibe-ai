@@ -87,6 +87,7 @@ type Settings = {
   autoApply: boolean;
   autoFix: boolean;
   shareProject: boolean;
+  zeroCostOnly: boolean;
 };
 
 type State = {
@@ -146,6 +147,7 @@ export const useStudio = create<State>()(
           autoApply: true,
           autoFix: true,
           shareProject: false,
+          zeroCostOnly: true,
         },
         projects: [first],
         currentId: first.id,
