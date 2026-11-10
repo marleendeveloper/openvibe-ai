@@ -85,9 +85,9 @@ export const getPublication = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: unknown) => cloudIdSchema.parse(input))
   .handler(async ({ data, context }) => {
-    const { data, error } = await context.supabase.from("published_apps").select("slug,title,published_at").eq("project_id", data.cloudId).eq("user_id", context.userId).maybeSingle();
+    const { data: pub, error } = await context.supabase.from("published_apps").select("slug,title,published_at").eq("project_id", data.cloudId).eq("user_id", context.userId).maybeSingle();
     if (error) throw new Error(error.message);
-    return data;
+    return pub;
   });
 
 export const loadPublishedApp = createServerFn({ method: "GET" })
