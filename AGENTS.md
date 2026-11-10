@@ -37,3 +37,4 @@ use the editor.
 - Validate file operations atomically before snapshots and use bounded repair attempts with duplicate-error detection; preview success must match the changed revision.
 - Check live, complete OpenRouter pricing before zero-cost generation and connection tests; never infer free pricing from a model name or fall back to a paid model.
 - Keep code review separate from external-provider coding: authenticated server functions call the AI Gateway SDK, review only consented files, pin reports to project revisions, and never automatically apply suggestions.
+- Activate saved workspace provider credentials only through authenticated server actions that issue encrypted browser-scoped cookies; never return the credential or expose it to public AI requests without the cookie.

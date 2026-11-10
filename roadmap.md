@@ -22,3 +22,4 @@
 - [ ] Add authenticated AI Gateway review of the current project or selected files, with prioritized bugs, security risks and concrete fixes.
 - [ ] Require explicit transfer consent, pin reports to project/revision, and never apply review suggestions automatically.
 - [ ] Test actual review with sample code, review validation, and mobile/desktop use.
+- [ ] Use the saved `OPENROUTER_API_KEY` through an authenticated action and run real external coding. Current blocker: no signed-in app user exists for a safe shared-secret test.
