@@ -11,7 +11,7 @@
 | Keine Teilantwort als Modellkontext | ja (A.3) | ja | nein | nein |
 | Codegenerierung, Reparatur, Rückgängig | ja | ja | historisch belegt, aktuell nicht wiederholt | historisch (Playwright) |
 
-Belegte Läufe: 85 Tests / 12 Dateien bestanden, TypeScript 0 Fehler, Build Exit 0. Lint **nicht bestanden** (nur vorbestehende Prettier-Fehler, 0 neue in geänderten Dateien; vollständiger `eslint .` nicht abgeschlossen).
+Belegte Läufe: 85 Tests / 12 Dateien bestanden, TypeScript 0 Fehler, Build Exit 0. Lint **nicht bestanden**: agent.ts/store.ts/Chat.tsx jetzt 0 Meldungen; vollständiger Lauf (ohne `.oj-cache`) 1084 Fehler + 11 Warnungen, alle vorbestehend in anderen Dateien (siehe Abschnitt 10).
 
 Offen: echter Fortsetzungs-/Retry-Test mit Nemotron (braucht Freigabe zur Anmeldung als Marleen oder Justin), Phase B (Passkey-Gerät, Mail-Link, MCP, Vorlagen, Desktop, Reduced Motion), Phase C (GitHub zurückgestellt, CI), Prettier-Altlasten.
 
@@ -109,3 +109,11 @@ Phase A, Punkt 1: Den Plan und den Index des fehlgeschlagenen Schritts in der Na
 - Phase-5-Plan (archiviert): datierte Korrektur zur falschen Retry-Aussage ergänzt.
 - roadmap.md: Phase A zusammengefasst; zwei Registrierungs-Aufgaben als entfallen markiert, weil die Registrierung seit Phase 6 abgeschaltet ist (nicht als erledigt).
 - Keine Codeänderung, daher keine Tests erneut ausgeführt.
+
+## 10. Prettier-Altlasten in agent.ts / store.ts / Chat.tsx (~17:45 UTC)
+
+- **Vorher:** `prettier --check` meldete alle 3 Dateien. Danach `prettier --write` nur auf diese 3 Dateien.
+- **Diff:** agent.ts 309, store.ts 150, Chat.tsx 387 geänderte Zeilen (`diff`, +/-). Abgesehen von Leerraum/Klammern/Kommas bleibt store.ts gleich. In agent.ts änderten sich nur Anführungszeichen-Stile in Strings (Escapes entfernt, gleicher Wert); in Chat.tsx kamen nur JSX-Leerzeichen `{" "}` dazu, die den bisherigen Abstand erhalten. Keine Logikänderung.
+- **Tests:** 12 Dateien, 85 bestanden, 0 fehlgeschlagen. **TypeScript:** 0 Fehler. **Build:** Exit 0 (Ausgabe nach /tmp).
+- **Lint der 3 Dateien:** 0 Meldungen.
+- **Vollständiges `eslint .`:** `eslint .` lief > 20 min und wurde abgebrochen, weil der Ordner `.oj-cache` (Vorschau-Cache, generiert) nicht in den Ignores steht. Mit `--ignore-pattern '.oj-cache/**'` (ohne Konfig-Änderung) abgeschlossen in 6 s: **nicht bestanden**, 136 Dateien, 1084 Fehler, 11 Warnungen, alle in nicht angefassten Dateien und vorbestehend: prettier/prettier 1081 (u. a. supabase/types.ts 184, Settings.tsx 54, auth-middleware.ts 41; davon automatisch erzeugte Dateien unter src/integrations/supabase und src/generated, die nicht von Hand geändert werden dürfen), no-control-regex 2 (limits.ts, oauth-return-path.ts), react-hooks/rules-of-hooks 1 (passkey.functions.ts), react-hooks/exhaustive-deps 4 Warnungen (Account, Passkeys, Preview ×2), react-refresh/only-export-components 7 Warnungen. 0 neue Fehler.
