@@ -34,10 +34,10 @@ async function streamWithRetry(opts: Parameters<typeof streamChat>[0], onRetry: 
 
 const withImages = (text: string, images: string[]): string | ContentPart[] => images.length ? [{ type: "text", text }, ...images.map((url) => ({ type: "image_url" as const, image_url: { url } }))] : text;
 
-export async function runAgent(prompt: string, images: string[] = []): Promise<void> {
+export async function runAgent(prompt: string, images: string[] = [], modelOverride?: string): Promise<void> {
   if (useRuntime.getState().busy || !prompt.trim()) return;
   const st = useStudio.getState();
-  const s = { ...st.settings };
+  const s = { ...st.settings, ...(modelOverride ? { model: modelOverride } : {}) };
   const project = st.projects.find((p) => p.id === st.currentId);
   if (!project) return;
   const projectId = project.id;
@@ -129,6 +129,7 @@ export async function runAgent(prompt: string, images: string[] = []): Promise<v
     const msg = (e as Error).name === "AbortError" ? "Abgebrochen." : (e as Error).message;
     useStudio.getState().updateMessage(aid, { error: msg }, projectId);
     rt.step(msg);
+    rt.setPhase(null);
   } finally {
     rt.setBusy(false);
     if (controller === activeController) controller = null;
