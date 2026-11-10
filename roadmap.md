@@ -1,3 +1,3 @@
 # Tasks
 
-- [ ] Test AI coding and preview with an external API. Blocked until an external provider connection or valid provider-issued credential is available; do not use Lovable AI for this test.
+- [ ] Test AI coding and preview with Hugging Face, not Lovable AI. Connection created and read-only credential path verified. Blocked: Hugging Face rejected the selected Qwen coding model as unsupported by enabled providers; await approval to use an available model before further generation calls.
