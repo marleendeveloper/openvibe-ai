@@ -5,8 +5,8 @@ let failAt: number | null = null;
 vi.mock("./provider-client", () => ({ loadProvider: async () => ({ configured: true }) }));
 vi.mock("./ai", () => ({
   streamChat: async (o: { messages: { role: string; content: unknown }[]; onToken: (t: string) => void }) => {
-    const last = String(o.messages[o.messages.length - 1].content);
-    if (o.messages[0].content && String(o.messages[0].content).startsWith("Split")) { o.onToken('["A","B","C","D"]'); return ""; }
+    const last = String(o.messages.at(-1)!.content);
+    if (String(o.messages[0]!.content).startsWith("Split")) { o.onToken('["A","B","C","D"]'); return ""; }
     const n = Number(last.match(/step (\d) of 4/)?.[1] ?? 0);
     calls.push(n ? `S${n}` : "single");
     if (n === failAt) throw new Error("Tokenlimit erreicht");
