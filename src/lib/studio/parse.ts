@@ -29,8 +29,19 @@ export function parseFileOps(text: string): FileOp[] {
     if (m[1]) ops.push({ type: "write", path: normalizePath(m[1]), content: stripFence(m[2] ?? "") });
     else if (m[3]) ops.push({ type: "delete", path: normalizePath(m[3]) });
   }
-  validateOps(ops);
-  return ops;
+  const merged = collapseReplace(ops);
+  validateOps(merged);
+  return merged;
+}
+
+/** A delete immediately superseded by one full write of the same path is a replacement, not ambiguity. */
+export function collapseReplace(ops: FileOp[]): FileOp[] {
+  return ops.filter((op, i) => {
+    if (op.type !== "delete") return true;
+    const later = ops.slice(i + 1).filter((o) => o.path === op.path);
+    const earlier = ops.slice(0, i).filter((o) => o.path === op.path);
+    return !(earlier.length === 0 && later.length === 1 && later[0]!.type === "write");
+  });
 }
 
 export function validateOps(ops: FileOp[]) {
