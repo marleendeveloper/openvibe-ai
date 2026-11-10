@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import type { ModelInfo } from "@/lib/studio/providers";
 
 export const Route = createFileRoute("/api/public/provider")({
   server: { handlers: {
@@ -7,7 +8,7 @@ export const Route = createFileRoute("/api/public/provider")({
       try {
         const provider = p.providerSchema.parse(new URL(request.url).searchParams.get("provider"));
         const key = await p.readCredential(provider);
-        let models = [];
+        let models: ModelInfo[] = [];
         let error;
         try { models = await p.modelCatalog(provider, key); } catch (e) { error = (e as Error).message; }
         return Response.json({ configured: !!key, baseUrl: p.baseUrl(provider), models, error }, { headers: { "cache-control": "no-store" } });

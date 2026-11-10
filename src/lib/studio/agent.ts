@@ -69,6 +69,7 @@ export async function runAgent(prompt: string): Promise<void> {
       st.updateMessage(aid, { ops, opsStatus: "pending", baseFiles }, projectId);
       if (!s.autoApply) { rt.step("Änderungen warten auf Bestätigung"); break; }
       if (activeController.signal.aborted) throw new DOMException("Aborted", "AbortError");
+      if (useStudio.getState().currentId !== projectId) throw new Error("Projekt gewechselt. Aufgabe gestoppt; keine Änderungen am anderen Projekt.");
       applyMessageOps(aid, projectId);
       rt.step(`${ops.length} Dateiänderungen angewendet · Wiederherstellungspunkt gesichert`);
       if (!s.autoFix) break;
@@ -101,5 +102,5 @@ export function applyMessageOps(id: string, projectId = useStudio.getState().cur
   if (!p || !m?.ops || m.opsStatus !== "pending") return;
   if (m.baseFiles && JSON.stringify(p.files) !== JSON.stringify(m.baseFiles)) throw new Error("Dateien wurden inzwischen verändert. Aufgabe mit dem aktuellen Stand erneut senden.");
   st.applyOps(m.ops, `KI: ${m.ops.length} Datei(en)`, projectId);
-  st.updateMessage(id, { opsStatus: "applied", baseFiles: undefined }, projectId);
+  st.updateMessage(id, { opsStatus: "applied", baseFiles: {} }, projectId);
 }
