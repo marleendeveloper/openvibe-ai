@@ -40,11 +40,11 @@
 
 # Phase 4
 
-- [ ] Cloud-Speicher für Projekte: Tabellen, serverseitige Speicher-/Ladefunktionen, Studio-Sync bei Anmeldung.
-- [ ] Chat-Verlauf pro Projekt in der Datenbank, beim Laden wiederherstellen.
-- [ ] Apps veröffentlichen: öffentlicher Link pro Projekt, öffentliche Ansicht, Veröffentlichung zurücknehmen.
-- [ ] Tests: automatische Regeln plus Handy/Desktop-Browserprüfung des Speicherns, Ladens und Veröffentlichens.
-- [ ] Anmelde-Rundlauf mit der E-Mail des Nutzers: Registrierung, Bestätigung, Login, Logout.
+- [x] Cloud-Speicher für Projekte: Tabellen mit Kontozugriff, serverseitige Speicher-/Ladefunktionen, Konto-Bereich im Dateien-Tab.
+- [x] Chat-Verlauf pro Projekt in der Datenbank, beim Laden wiederhergestellt (mit Testnachricht auf dem Handy geprüft).
+- [x] Apps veröffentlichen: öffentlicher Link /p/<name>, öffentliche Ansicht ohne Anmeldung, Aktualisieren und Zurücknehmen geprüft.
+- [x] Tests: 55 automatische Prüfungen fehlerfrei; Handy-Browserprüfung von Speichern, Laden, Verlauf, Veröffentlichen und Zurücknehmen.
+- [ ] Anmelde-Rundlauf mit der E-Mail des Nutzers: Registrierung, Bestätigung, Login, Logout. Blocker: Nutzer muss sich selbst registrieren; danach prüfe ich den Rundlauf.
 
 # End-to-end brief (real Nemotron, mobile)
 
