@@ -16,8 +16,10 @@ function Listener({ projectId, revision }: { projectId: string; revision: string
   const setPreview = useRuntime((s) => s.setPreview);
   useEffect(() => {
     setPreview({ projectId, revision, status: "loading", error: null });
+  }, [projectId, revision, setPreview]);
+  useEffect(() => {
     return listen((message) => {
-      if (message.type === "success") setPreview({ projectId, revision, status: "ready", error: null });
+      if (message.type === "success" || message.type === "done") setPreview({ projectId, revision, status: "ready", error: null });
       if (message.type === "action" && message.action === "show-error") {
         const error = [message.title, message.message].filter(Boolean).join("\n");
         setPreview({ projectId, revision, status: "error", error: error || "Vorschaufehler" });
