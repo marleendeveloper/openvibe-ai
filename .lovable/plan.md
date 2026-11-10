@@ -6,12 +6,12 @@
 
 | Bereich | Implementiert | Mock-/Unit-getestet | Echter Provider-Test | Browser/E2E |
 |---|---|---|---|---|
-| Retry nach Transportfehler (voller Schritt, Teilantwort verworfen) | ja | ja (retry.test.ts) | historisch Abbrüche beobachtet, Retry nie real bestätigt | nein |
-| Fortsetzen ab fehlgeschlagenem Plan-Schritt | ja (A.1) | ja (resume.test.ts) | nein | nein |
+| Retry nach Transportfehler (voller Schritt, Teilantwort verworfen) | ja | ja (retry.test.ts) | **real beobachtet** (Abschnitt 11) | ja, Browser 1280 px |
+| Fortsetzen ab fehlgeschlagenem Plan-Schritt | ja (A.1) | ja (resume.test.ts) | real: Schritt 1 fortgesetzt und angewendet; Plan nie komplett | ja, Browser 1280 px |
 | Keine Teilantwort als Modellkontext | ja (A.3) | ja | nein | nein |
 | Codegenerierung, Reparatur, Rückgängig | ja | ja | historisch belegt, aktuell nicht wiederholt | historisch (Playwright) |
 
-Belegte Läufe: 85 Tests / 12 Dateien bestanden, TypeScript 0 Fehler, Build Exit 0. Lint **nicht bestanden**: agent.ts/store.ts/Chat.tsx jetzt 0 Meldungen; vollständiger Lauf (ohne `.oj-cache`) 1084 Fehler + 11 Warnungen, alle vorbestehend in anderen Dateien (siehe Abschnitt 10).
+Belegte Läufe: 85 Tests / 12 Dateien bestanden, TypeScript 0 Fehler, Build Exit 0. Lint **bestanden** seit ~18:20 UTC: `eslint .` 0 Fehler, 11 Warnungen (Abschnitt 11). Tests: 87 / 12 Dateien.
 
 Offen: echter Fortsetzungs-/Retry-Test mit Nemotron (braucht Freigabe zur Anmeldung als Marleen oder Justin), Phase B (Passkey-Gerät, Mail-Link, MCP, Vorlagen, Desktop, Reduced Motion), Phase C (GitHub zurückgestellt, CI), Prettier-Altlasten.
 
@@ -117,3 +117,12 @@ Phase A, Punkt 1: Den Plan und den Index des fehlgeschlagenen Schritts in der Na
 - **Tests:** 12 Dateien, 85 bestanden, 0 fehlgeschlagen. **TypeScript:** 0 Fehler. **Build:** Exit 0 (Ausgabe nach /tmp).
 - **Lint der 3 Dateien:** 0 Meldungen.
 - **Vollständiges `eslint .`:** `eslint .` lief > 20 min und wurde abgebrochen, weil der Ordner `.oj-cache` (Vorschau-Cache, generiert) nicht in den Ignores steht. Mit `--ignore-pattern '.oj-cache/**'` (ohne Konfig-Änderung) abgeschlossen in 6 s: **nicht bestanden**, 136 Dateien, 1084 Fehler, 11 Warnungen, alle in nicht angefassten Dateien und vorbestehend: prettier/prettier 1081 (u. a. supabase/types.ts 184, Settings.tsx 54, auth-middleware.ts 41; davon automatisch erzeugte Dateien unter src/integrations/supabase und src/generated, die nicht von Hand geändert werden dürfen), no-control-regex 2 (limits.ts, oauth-return-path.ts), react-hooks/rules-of-hooks 1 (passkey.functions.ts), react-hooks/exhaustive-deps 4 Warnungen (Account, Passkeys, Preview ×2), react-refresh/only-export-components 7 Warnungen. 0 neue Fehler.
+
+## 11. Lint vollständig, Planschritt-Fix, echter Nemotron-Test (~18:20 UTC)
+
+- **Lint:** `.oj-cache` und automatisch erzeugte Dateien (`src/integrations/supabase/**`, `src/generated/**`, `src/ai-gateway.types.ts`, `src/routeTree.gen.ts`) in die ESLint-Ignores aufgenommen. 57 handgeschriebene Dateien mit `eslint --fix` formatiert (Vergleich ohne Leerraum: nur Layout). 3 echte Fehler mit begründeten Kommentaren gelöst: 2× no-control-regex (Steuerzeichen werden absichtlich abgelehnt), 1× rules-of-hooks (`useSession` ist TanStack-Server-Session, kein React-Hook). **`eslint .`: Exit 0, 0 Fehler, 11 Warnungen** (4 exhaustive-deps, 7 only-export-components).
+- **Tests:** 12 Dateien, **87 bestanden** (2 neue Mock-Tests in resume.test.ts). TypeScript 0 Fehler, Build Exit 0.
+- **Echter Provider-/Browsertest (Marleen, 1280 px, Nemotron, neues Rezept-App-Projekt nicht gespeichert):**
+  - Lauf 1: Plan mit 4 Schritten, Schritt 1 brach **echt** ab, beide automatischen Neuversuche liefen (2 davon von uns per Netzwerk-Abbruch erzwungen), Meldung „Neuer Versuch 1/2“ und „2/2“ sichtbar, nichts angewendet, Knopf „Ab Schritt 1 fortsetzen“. Fortsetzen: Schritt 1 mit 8 Dateien angewendet, Vorschaufehler „React is not defined“ automatisch repariert. **Dann Fehler in Schritt 2:** Nemotron meldete „Schritt 2 ist bereits vollständig implementiert“ ohne Dateien, das Studio wertete das als Fehler.
+  - **Fix:** In Mehrschritt-Plänen gilt eine Antwort ohne Dateiänderungen mit Text als „Keine Dateiänderungen nötig (laut Modell)“ und der Plan läuft weiter; leere Antworten und Einzelaufträge scheitern weiterhin klar. Durch 2 Mock-Tests belegt; **real nicht bestätigt**.
+  - Läufe 2 und 3: Nemotron brach Schritt 1 dreimal in Folge selbst ab („error reading a body from connection“), auch ohne erzwungene Abbrüche. Neuversuche liefen, nichts angewendet, neuer Fortsetzungspunkt. Ein kompletter Plan bis Schritt 4 wurde **nicht** erreicht.
