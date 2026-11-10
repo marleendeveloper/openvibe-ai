@@ -1,7 +1,8 @@
 import type { ProviderId } from "./providers";
 import { LIMITS, byteSize } from "./limits";
 
-export type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
+export type ContentPart = { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } };
+export type ChatMsg = { role: "system" | "user" | "assistant"; content: string | ContentPart[] };
 
 export async function streamChat(opts: {
   provider: ProviderId;

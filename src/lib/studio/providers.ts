@@ -6,7 +6,7 @@ export const PROVIDERS: Record<ProviderId, { name: string; baseUrl: string; keyH
   custom: { name: "OpenAI-kompatibel", baseUrl: "", keyHint: "API-Key" },
 };
 
-export type ModelInfo = { id: string; name: string; free: boolean; context?: number };
+export type ModelInfo = { id: string; name: string; free: boolean; context?: number; vision?: boolean };
 export type ProviderStatus = { configured: boolean; baseUrl: string; models: ModelInfo[]; recommendedModel?: string; error?: string };
 
 // Ordered preference, not a benchmark ranking. Only live zero-priced entries qualify.

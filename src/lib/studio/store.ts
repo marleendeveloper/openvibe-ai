@@ -13,6 +13,8 @@ export type Message = {
   opsStatus?: "pending" | "applied" | "rejected";
   error?: string;
   baseFiles?: Files;
+  /** Anzahl angehängter Bilder; die Bilder selbst werden nie gespeichert. */
+  images?: number;
 };
 export type Snapshot = { id: string; at: number; label: string; files: Files };
 export type Project = {

@@ -57,7 +57,7 @@ export function Publish({ onClose }: { onClose: () => void }) {
   const url = published ? `${window.location.origin}/p/${published.slug}` : null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-background/80 p-4" role="dialog" aria-label="App veröffentlichen">
+    <div className="tab-in *:dialog-in fixed inset-0 z-50 grid place-items-center bg-background/80 p-4" role="dialog" aria-label="App veröffentlichen">
       <div className="w-full max-w-md rounded-lg border bg-panel p-4 space-y-3 shadow-xl">
         <div className="flex items-center gap-2">
           <Globe size={17} className="text-primary" />

@@ -89,8 +89,8 @@ export default function Studio() {
               <Btn className={cn(rightTab === "code" && "bg-primary/20 text-primary")} onClick={() => setRightTab("code")}><Code2 size={14} /> Code</Btn>
             </div>
             <div className="relative min-h-0 flex-1">
-              <div className={cn("absolute inset-0", rightTab !== "preview" && "hidden")}><Preview /></div>
-              {rightTab === "code" && <div className="absolute inset-0 bg-background"><CodeEditor /></div>}
+              <div className={cn("tab-in absolute inset-0", rightTab !== "preview" && "hidden")}><Preview /></div>
+              {rightTab === "code" && <div className="tab-in absolute inset-0 bg-background"><CodeEditor /></div>}
             </div>
           </section>
         </div>
@@ -113,10 +113,10 @@ export default function Studio() {
     <div className="flex h-dvh flex-col">
       {header}
       <main className="relative min-h-0 flex-1">
-        <div className={cn("absolute inset-0 z-10", mobileTab !== "files" && "hidden")}><FileTree onOpen={() => setMobileTab("code")} /></div>
-        <div className={cn("absolute inset-0 z-10 bg-background", mobileTab !== "chat" && "hidden")}><Chat /></div>
-        {mobileTab === "code" && <div className="absolute inset-0 z-10 bg-background"><CodeEditor /></div>}
-        <div className={cn("absolute inset-0", mobileTab !== "preview" && "hidden")}><Preview /></div>
+        <div className={cn("tab-in absolute inset-0 z-10", mobileTab !== "files" && "hidden")}><FileTree onOpen={() => setMobileTab("code")} /></div>
+        <div className={cn("tab-in absolute inset-0 z-10 bg-background", mobileTab !== "chat" && "hidden")}><Chat /></div>
+        {mobileTab === "code" && <div className="tab-in absolute inset-0 z-10 bg-background"><CodeEditor /></div>}
+        <div className={cn("tab-in absolute inset-0", mobileTab !== "preview" && "hidden")}><Preview /></div>
       </main>
       <nav className="grid shrink-0 grid-cols-4 border-t bg-panel pb-[env(safe-area-inset-bottom)]">
         {tabs.map((t) => (

@@ -47,7 +47,7 @@ export function Overview({ onClose, onSignIn }: { onClose: () => void; onSignIn:
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
+    <div className="tab-in *:dialog-in fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
       <div role="dialog" aria-label="Projekt-Übersicht" className="flex max-h-[92dvh] w-full max-w-2xl flex-col rounded-t-2xl border bg-panel md:rounded-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center gap-2 border-b px-4 py-3">
           <h2 className="flex-1 text-base font-extrabold uppercase tracking-[0.15em]">Projekte</h2>

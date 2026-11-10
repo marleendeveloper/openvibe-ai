@@ -1,5 +1,5 @@
 export const LIMITS = {
-  requestBytes: 1_500_000,
+  requestBytes: 4_500_000,
   responseBytes: 2_000_000,
   fileBytes: 500_000,
   projectBytes: 1_000_000,

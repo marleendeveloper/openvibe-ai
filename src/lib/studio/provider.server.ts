@@ -1,13 +1,20 @@
 import { getCookie, setCookie, deleteCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
 import { LIMITS, byteSize } from "./limits";
+import { validDataUrl, IMAGE_LIMITS } from "./phase5";
 import { PROVIDERS, providerError, hasZeroPricing, type ProviderId, type ModelInfo } from "./providers";
 
 export const providerSchema = z.enum(["openrouter", "huggingface", "custom"]);
+const contentPart = z.union([
+  z.object({ type: z.literal("text"), text: z.string().max(LIMITS.projectBytes) }).strict(),
+  z.object({ type: z.literal("image_url"), image_url: z.object({ url: z.string().refine(validDataUrl, "Ungültiges Bild.") }).strict() }).strict(),
+]);
+export const hasImages = (messages: { content: unknown }[]) => messages.some((m) => Array.isArray(m.content) && m.content.some((c: { type?: string }) => c.type === "image_url"));
 export const chatSchema = z.object({
   provider: providerSchema,
   model: z.string().min(1).max(200),
-  messages: z.array(z.object({ role: z.enum(["system", "user", "assistant"]), content: z.string().max(LIMITS.projectBytes) })).min(1).max(LIMITS.messages),
+  messages: z.array(z.object({ role: z.enum(["system", "user", "assistant"]), content: z.union([z.string().max(LIMITS.projectBytes), z.array(contentPart).min(1).max(IMAGE_LIMITS.count + 1)]) }).strict()).min(1).max(LIMITS.messages)
+    .refine((ms) => ms.reduce((n, m) => n + (Array.isArray(m.content) ? m.content.filter((c) => c.type === "image_url").length : 0), 0) <= IMAGE_LIMITS.count, "Zu viele Bilder."),
   temperature: z.number().min(0).max(1.5).default(0.4),
   max_tokens: z.number().int().min(128).max(LIMITS.maxTokens).default(8192),
   stream: z.boolean().default(true),
@@ -115,10 +122,18 @@ export async function modelCatalog(provider: ProviderId, key: string | null): Pr
   if (byteSize(raw) > 10_000_000) throw new Error("Modellkatalog zu groß.");
   const data = JSON.parse(raw).data;
   if (!Array.isArray(data)) throw new Error("Anbieter liefert keinen gültigen Modellkatalog.");
-  return data.filter((m) => typeof m.id === "string").map((m) => ({ id: m.id, name: m.name ?? m.id, context: m.context_length, free: provider === "openrouter" && hasZeroPricing(m.pricing) }));
+  return data.filter((m) => typeof m.id === "string").map((m) => ({ id: m.id, name: m.name ?? m.id, context: m.context_length, free: provider === "openrouter" && hasZeroPricing(m.pricing), vision: Array.isArray(m.architecture?.input_modalities) && m.architecture.input_modalities.includes("image") }));
 }
 
-export async function assertZeroCostModel(provider: ProviderId, model: string, enabled: boolean) {
+export async function assertZeroCostModel(provider: ProviderId, model: string, enabled: boolean, images = false) {
+  if (images) {
+    if (provider !== "openrouter") throw new Error("Bilder werden nur mit OpenRouter-Bildmodellen unterstützt.");
+    const catalog = await modelCatalog(provider, null);
+    const entry = catalog.find((m) => m.id === model);
+    if (!entry?.vision) throw new Error("Dieses Modell kann keine Bilder lesen. Keine KI-Anfrage gesendet.");
+    if (!entry.free) throw new Error("0€-Schutz: Bildmodell ist nicht vollständig kostenlos. Keine KI-Anfrage gesendet.");
+    return;
+  }
   if (!enabled) return;
   if (provider !== "openrouter") throw new Error("0€-Schutz: Für diesen Anbieter können kostenlose Preise nicht geprüft werden. OpenRouter wählen oder den Schutz bewusst ausschalten.");
   const catalog = await modelCatalog(provider, null);

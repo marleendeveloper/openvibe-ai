@@ -8,6 +8,8 @@ export const useRuntime = create<{
   logs: LogLine[];
   busy: boolean;
   progress: string[];
+  phase: "plan" | "write" | "check" | "done" | null;
+  setPhase: (p: "plan" | "write" | "check" | "done" | null) => void;
   connected: Partial<Record<ProviderId, boolean>>;
   preview: { projectId: string; revision: string; status: "loading" | "ready" | "error"; error: string | null } | null;
   setPreview: (value: { projectId: string; revision: string; status: "loading" | "ready" | "error"; error: string | null }) => void;
@@ -22,12 +24,14 @@ export const useRuntime = create<{
   logs: [],
   busy: false,
   progress: [],
+  phase: null,
+  setPhase: (phase) => set({ phase }),
   connected: {},
   preview: null,
   setPreview: (preview) => set({ preview, error: preview.error }),
   setConnected: (p, value) => set((s) => ({ connected: { ...s.connected, [p]: value } })),
   step: (text) => set((s) => ({ progress: [...s.progress, text].slice(-30) })),
-  resetProgress: () => set({ progress: [] }),
+  resetProgress: () => set({ progress: [], phase: null }),
   setError: (error) => set({ error }),
   setLogs: (logs) => set({ logs }),
   setBusy: (busy) => set({ busy }),

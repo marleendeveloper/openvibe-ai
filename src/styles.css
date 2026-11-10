@@ -106,3 +106,18 @@
   gap: 10px;
   font-weight: 500;
 }
+
+@keyframes ov-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ov-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ov-pop { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes ov-shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+@utility msg-in { animation: ov-fade-up 280ms cubic-bezier(.2,.8,.2,1) both; }
+@utility fade-up { animation: ov-fade-up 420ms cubic-bezier(.2,.8,.2,1) both; }
+@utility tab-in { animation: ov-fade 200ms ease-out both; }
+@utility dialog-in { animation: ov-pop 260ms cubic-bezier(.2,.8,.2,1) both; }
+@utility lift { transition: transform 160ms, border-color 160ms, box-shadow 160ms; &:hover { transform: translateY(-2px); border-color: var(--primary); box-shadow: 0 8px 24px -12px var(--primary); } &:active { transform: scale(0.98); } }
+@utility skeleton { border-radius: 9999px; background: linear-gradient(90deg, var(--muted) 25%, color-mix(in oklab, var(--primary) 25%, var(--muted)) 50%, var(--muted) 75%); background-size: 200% 100%; animation: ov-shimmer 1.4s linear infinite; }
+@utility shimmer { background-size: 200% 100%; animation: ov-shimmer 1.6s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}

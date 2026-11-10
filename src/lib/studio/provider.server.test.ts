@@ -1,3 +1,4 @@
+import { LIMITS } from "./limits";
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { webcrypto } from "node:crypto";
 
@@ -37,7 +38,7 @@ describe("server provider security", () => {
     expect(() => chatSchema.parse({ ...valid, provider: "unknown" })).toThrow();
   });
   it("bounds incoming request bytes even without content-length", async () => {
-    await expect(readBoundedBody(new Request("https://studio.example/api/public/ai", { method: "POST", body: "x".repeat(1_500_001) }))).rejects.toThrow("size");
+    await expect(readBoundedBody(new Request("https://studio.example/api/public/ai", { method: "POST", body: "x".repeat(LIMITS.requestBytes + 1) }))).rejects.toThrow("size");
   });
   it("never accepts a client-controlled custom network target", () => {
     vi.stubEnv("OPENVIBE_CUSTOM_BASE_URL", "http://localhost:3000");
