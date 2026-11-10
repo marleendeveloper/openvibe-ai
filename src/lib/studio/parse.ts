@@ -4,8 +4,7 @@ import { safePath, byteSize, LIMITS } from "./limits";
 //   <file path="/App.tsx">...full content...</file>
 //   <delete path="/old.ts" />
 export type FileOp =
-  | { type: "write"; path: string; content: string }
-  | { type: "delete"; path: string };
+  { type: "write"; path: string; content: string } | { type: "delete"; path: string };
 
 export function normalizePath(p: string): string {
   return safePath(p);
@@ -23,10 +22,12 @@ export function parseFileOps(text: string): FileOp[] {
   const complete = text.replace(/<file\s+path=["'][^"']+["']\s*>[\s\S]*?<\/file>/g, "");
   if (/<file\s+path=/.test(complete)) return [];
   const ops: FileOp[] = [];
-  const re = /<file\s+path=["']([^"']+)["']\s*>([\s\S]*?)<\/file>|<delete\s+path=["']([^"']+)["']\s*\/?>/g;
+  const re =
+    /<file\s+path=["']([^"']+)["']\s*>([\s\S]*?)<\/file>|<delete\s+path=["']([^"']+)["']\s*\/?>/g;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
-    if (m[1]) ops.push({ type: "write", path: normalizePath(m[1]), content: stripFence(m[2] ?? "") });
+    if (m[1])
+      ops.push({ type: "write", path: normalizePath(m[1]), content: stripFence(m[2] ?? "") });
     else if (m[3]) ops.push({ type: "delete", path: normalizePath(m[3]) });
   }
   const merged = collapseReplace(ops);
@@ -51,7 +52,8 @@ export function validateOps(ops: FileOp[]) {
     const path = safePath(op.path);
     if (paths.has(path)) throw new Error(`Mehrdeutige Änderungen für ${path}.`);
     paths.add(path);
-    if (op.type === "write" && byteSize(op.content) > LIMITS.fileBytes) throw new Error(`Datei zu groß: ${path}`);
+    if (op.type === "write" && byteSize(op.content) > LIMITS.fileBytes)
+      throw new Error(`Datei zu groß: ${path}`);
   }
 }
 

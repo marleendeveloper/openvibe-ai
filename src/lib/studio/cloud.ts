@@ -5,7 +5,16 @@ export const cloudMessageSchema = z.object({
   id: z.string().min(1).max(40),
   role: z.enum(["user", "assistant", "system"]),
   content: z.string().max(200_000),
-  ops: z.array(z.object({ type: z.enum(["write", "delete"]), path: z.string().max(240), content: z.string().max(LIMITS.fileBytes).optional() })).max(LIMITS.operations).optional(),
+  ops: z
+    .array(
+      z.object({
+        type: z.enum(["write", "delete"]),
+        path: z.string().max(240),
+        content: z.string().max(LIMITS.fileBytes).optional(),
+      }),
+    )
+    .max(LIMITS.operations)
+    .optional(),
   opsStatus: z.enum(["pending", "applied", "rejected"]).optional(),
   error: z.string().max(2000).optional(),
 });
@@ -19,7 +28,9 @@ export const cloudProjectSchema = z.object({
 
 export const publishSchema = z.object({
   cloudId: z.string().uuid(),
-  slug: z.string().regex(/^[a-z0-9][a-z0-9-]{2,59}$/, "3-60 Zeichen: Kleinbuchstaben, Ziffern, Bindestriche."),
+  slug: z
+    .string()
+    .regex(/^[a-z0-9][a-z0-9-]{2,59}$/, "3-60 Zeichen: Kleinbuchstaben, Ziffern, Bindestriche."),
   title: z.string().trim().min(1).max(120),
 });
 

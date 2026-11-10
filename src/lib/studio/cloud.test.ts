@@ -17,7 +17,9 @@ describe("cloudProjectSchema", () => {
   });
 
   it("lehnt Nachrichten mit unbekannter Rolle ab", () => {
-    expect(() => cloudProjectSchema.parse({ ...valid, messages: [{ id: "a", role: "admin", content: "x" }] })).toThrow();
+    expect(() =>
+      cloudProjectSchema.parse({ ...valid, messages: [{ id: "a", role: "admin", content: "x" }] }),
+    ).toThrow();
   });
 });
 
@@ -25,11 +27,15 @@ describe("publishSchema", () => {
   const uuid = "123e4567-e89b-12d3-a456-426614174000";
 
   it("akzeptiert gültigen Link-Namen", () => {
-    expect(publishSchema.parse({ cloudId: uuid, slug: "meine-app-1", title: "App" }).slug).toBe("meine-app-1");
+    expect(publishSchema.parse({ cloudId: uuid, slug: "meine-app-1", title: "App" }).slug).toBe(
+      "meine-app-1",
+    );
   });
 
   it("lehnt Großbuchstaben und Sonderzeichen ab", () => {
-    expect(() => publishSchema.parse({ cloudId: uuid, slug: "Meine_App!", title: "App" })).toThrow();
+    expect(() =>
+      publishSchema.parse({ cloudId: uuid, slug: "Meine_App!", title: "App" }),
+    ).toThrow();
   });
 
   it("lehnt zu kurze Link-Namen ab", () => {

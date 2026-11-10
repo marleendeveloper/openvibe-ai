@@ -13,7 +13,11 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ project_id, path }, ctx) => {
     const sb = supabaseForUser(ctx);
-    const { data, error } = await sb.from("projects").select("name,files").eq("id", project_id).maybeSingle();
+    const { data, error } = await sb
+      .from("projects")
+      .select("name,files")
+      .eq("id", project_id)
+      .maybeSingle();
     if (error) throw new ToolError(error.message);
     if (!data) throw new ToolError("Projekt nicht gefunden.");
     const files = (data.files ?? {}) as Record<string, string>;
@@ -22,7 +26,9 @@ export default defineTool({
       if (typeof file !== "string") throw new ToolError(`Datei ${path} nicht gefunden.`);
       return { content: [{ type: "text", text: file }] };
     }
-    const text = Object.entries(files).map(([p, c]) => `<file path="${p}">\n${c}\n</file>`).join("\n\n");
+    const text = Object.entries(files)
+      .map(([p, c]) => `<file path="${p}">\n${c}\n</file>`)
+      .join("\n\n");
     return { content: [{ type: "text", text: `Projekt ${data.name}\n\n${text}` }] };
   },
 });
