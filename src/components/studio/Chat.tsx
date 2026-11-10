@@ -61,7 +61,7 @@ function Bubble({ m, onRetry }: { m: Message; onRetry?: () => void }) {
       {body ? <div className="whitespace-pre-wrap leading-relaxed">{body}</div> : !m.error && <div className="space-y-1.5"><div className="skeleton h-3 w-3/4" /><div className="skeleton h-3 w-1/2" /></div>}
       {m.error && <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-2 text-xs text-destructive">
         <p className="font-mono whitespace-pre-wrap">{m.error}</p>
-        {onRetry && <Btn variant="outline" className="mt-2 h-7 text-foreground" onClick={onRetry}><RotateCw size={13} /> Erneut versuchen</Btn>}
+        {onRetry && <Btn variant="outline" className="mt-2 h-7 text-foreground" onClick={onRetry}><RotateCw size={13} /> {m.resume ? `Ab Schritt ${m.resume.failedStep + 1} fortsetzen` : "Erneut versuchen"}</Btn>}
       </div>}
       {m.ops && (
         <div className="rounded-lg border bg-card p-2">
@@ -190,7 +190,7 @@ export function Chat() {
             </div>
           </div>
         )}
-        {project.messages.map((m, i) => <Bubble key={m.id} m={m} {...(m.error && i === project.messages.length - 1 && lastUser && !busy ? { onRetry: () => void runAgent(lastUser.content) } : {})} />)}
+        {project.messages.map((m, i) => <Bubble key={m.id} m={m} {...(m.error && i === project.messages.length - 1 && lastUser && !busy ? { onRetry: () => void runAgent(m.resume?.prompt ?? lastUser.content, [], undefined, m.resume) } : {})} />)}
         <div ref={endRef} />
       </div>
 

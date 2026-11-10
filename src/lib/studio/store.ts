@@ -15,7 +15,11 @@ export type Message = {
   baseFiles?: Files;
   /** Anzahl angehängter Bilder; die Bilder selbst werden nie gespeichert. */
   images?: number;
+  /** Fortsetzungspunkt eines fehlgeschlagenen Mehrschritt-Auftrags. */
+  resume?: ResumePoint;
 };
+/** Plan, fehlgeschlagener Schritt und Dateistand beim Abbruch; Fortsetzung nur bei identischem Projekt und Stand. */
+export type ResumePoint = { prompt: string; steps: string[]; failedStep: number; projectId: string; revision: string };
 export type Snapshot = { id: string; at: number; label: string; files: Files };
 export type Project = {
   id: string;
