@@ -1,4 +1,19 @@
-# OpenVibe – Bestands- und Qualitätsaudit (Stand: 10.11.2026, 16:41 UTC)
+# OpenVibe – Bestands- und Qualitätsaudit (Audit: 10.11.2026, 16:41 UTC; Gesamtstatus aktualisiert ~17:20 UTC)
+
+> Abschnitte 1–6 sind der Audit-Stand von 16:41 UTC. Der aktuelle Stand steht in Abschnitt 0 sowie 7–9.
+
+## 0. Aktueller Gesamtstatus (~17:20 UTC)
+
+| Bereich | Implementiert | Mock-/Unit-getestet | Echter Provider-Test | Browser/E2E |
+|---|---|---|---|---|
+| Retry nach Transportfehler (voller Schritt, Teilantwort verworfen) | ja | ja (retry.test.ts) | historisch Abbrüche beobachtet, Retry nie real bestätigt | nein |
+| Fortsetzen ab fehlgeschlagenem Plan-Schritt | ja (A.1) | ja (resume.test.ts) | nein | nein |
+| Keine Teilantwort als Modellkontext | ja (A.3) | ja | nein | nein |
+| Codegenerierung, Reparatur, Rückgängig | ja | ja | historisch belegt, aktuell nicht wiederholt | historisch (Playwright) |
+
+Belegte Läufe: 85 Tests / 12 Dateien bestanden, TypeScript 0 Fehler, Build Exit 0. Lint **nicht bestanden** (nur vorbestehende Prettier-Fehler, 0 neue in geänderten Dateien; vollständiger `eslint .` nicht abgeschlossen).
+
+Offen: echter Fortsetzungs-/Retry-Test mit Nemotron (braucht Freigabe zur Anmeldung als Marleen oder Justin), Phase B (Passkey-Gerät, Mail-Link, MCP, Vorlagen, Desktop, Reduced Motion), Phase C (GitHub zurückgestellt, CI), Prettier-Altlasten.
 
 Dies ist eine reine Leseprüfung. Es wurden keine Dateien, Pakete oder Datenbankeinträge geändert und keine Geheimnisse gelesen. Ausgeführt wurde nur die vorhandene Testsuite (nur lesend). GitHub ist nicht verbunden, der Code ist also nirgends extern gesichert.
 
@@ -30,7 +45,7 @@ Dies ist eine reine Leseprüfung. Es wurden keine Dateien, Pakete oder Datenbank
 | Magic-Link-Notfall | ja | – | Regeltest | Mail und Klick |
 | Credential-Cookie AES-GCM | ja | Nutzung im Studio | Unit-Tests | – |
 | 0€-Guard | ja | Nemotron-Läufe | free-models-Tests | – |
-| SSE, Abbruch, Retry | ja (voller Neuversuch) | Abbrüche beobachtet | isRetryableError | Retry real |
+| SSE, Abbruch, Retry | ja (voller Neuversuch) | Abbrüche beobachtet | isRetryableError (Stand 16:41; seit A.3 auch Mock-Stream-Tests) | Retry real |
 | Mehrschritt-Plan | ja | Schritte 1–2 | parsePlan, needsPlan | kompletter Lauf |
 | Atomare File-Ops, Reparatur, Pinning | ja | 1 Reparaturfall, Rückgängig | phase2-Tests | – |
 | Bilder und Vision-Modell | ja | Auftrag ohne Fehler | Limits, Server-Schema | Vorschau |
@@ -87,3 +102,10 @@ Phase A, Punkt 1: Den Plan und den Index des fehlgeschlagenen Schritts in der Na
 - **Mock-Tests (echter `streamChat`-SSE-Parser, `fetch` gemockt):** Abbruch nach Teil-Tokens -> „Neuer Versuch 1/2“, Teil-Datei wird nicht angewendet, zweiter Versuch: genau 1 Dateioperation und 1 Snapshot; zwei fehlgeschlagene Neuversuche -> 3 Anfragen, klare Fehlermeldung, Dateien unverändert; manueller Stopp -> 1 Anfrage, kein Neuversuch, „Abgebrochen.“; kein Teilantwort-Kontext in der Folgeanfrage.
 - **Ergebnisse:** `vitest run` 12 Dateien, 85 Tests bestanden. `tsgo -b --noEmit` 0 Fehler. `vite build` Exit 0. ESLint pro geänderter Datei vs. Git-HEAD (HEAD enthält bereits A.1): agent.ts 75/75, store.ts 24/24, Chat.tsx 61/61, alles vorbestehende Prettier-Formatfehler, 0 neue; neue Testdateien 0 Fehler nach `--fix`. Vollständiger `eslint .` nicht ausgeführt (lief früher >200 s ohne Ergebnis).
 - **Nicht getestet:** echter Abbruch bei Nemotron/OpenRouter, Browserlauf. Echte Provider-Tests: 0.
+
+## 9. Phase A.2 – Dokumente (~17:20 UTC)
+
+- PHASE2-REPORT.md und PHASE3-REPORT.md als historisch markiert, datierter Aktualisierungsabschnitt ergänzt.
+- Phase-5-Plan (archiviert): datierte Korrektur zur falschen Retry-Aussage ergänzt.
+- roadmap.md: Phase A zusammengefasst; zwei Registrierungs-Aufgaben als entfallen markiert, weil die Registrierung seit Phase 6 abgeschaltet ist (nicht als erledigt).
+- Keine Codeänderung, daher keine Tests erneut ausgeführt.
