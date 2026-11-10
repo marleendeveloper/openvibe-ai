@@ -10,8 +10,8 @@
 
 # Phase 3 — Free coding setup and cost protection
 
-- [ ] Select a currently zero-priced external coding model from the live catalog without claiming a proven strongest model.
-- [ ] Add a default-on zero-cost guard for OpenRouter generation and connection tests, with no paid fallback.
-- [ ] Verify automated rules and desktop/mobile setup through the studio.
+- [x] Select a currently zero-priced external coding model from the live catalog without claiming a proven strongest model.
+- [x] Add a default-on zero-cost guard for OpenRouter generation and connection tests, with no paid fallback.
+- [x] Verify automated rules and desktop/mobile setup through the studio.
 - [ ] Run real external-provider generation. Blocker: no provider-issued credential or accessible connection; an external API key cannot be self-issued or sent in chat.
-- [ ] Record results and remaining limitations.
+- [x] Record results and remaining limitations (`PHASE3-REPORT.md`).
