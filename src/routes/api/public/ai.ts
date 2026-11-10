@@ -1,33 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PROXY_HOSTS } from "@/lib/studio/providers";
-
-// Stateless streaming relay. Stores nothing; the caller supplies their own key.
-// Only forwards to allow-listed AI hosts so it can't be used as a general proxy.
 export const Route = createFileRoute("/api/public/ai")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const target = request.headers.get("x-target-url") ?? "";
-        const auth = request.headers.get("authorization") ?? "";
-        let url: URL;
+        const p = await import("@/lib/studio/provider.server");
         try {
-          url = new URL(target);
-        } catch {
-          return new Response("bad target", { status: 400 });
-        }
-        if (url.protocol !== "https:" || !PROXY_HOSTS.includes(url.hostname) || !url.pathname.endsWith("/chat/completions")) {
-          return new Response("target not allowed", { status: 403 });
-        }
-        if (!auth) return new Response("missing key", { status: 401 });
-        const upstream = await fetch(url.toString(), {
-          method: "POST",
-          headers: { "content-type": "application/json", authorization: auth },
-          body: await request.text(),
-        });
-        return new Response(upstream.body, {
-          status: upstream.status,
-          headers: { "content-type": upstream.headers.get("content-type") ?? "text/event-stream", "cache-control": "no-cache" },
-        });
+          p.assertSameOrigin(request);
+          const data = p.chatSchema.parse(await p.readBoundedBody(request));
+          const key = await p.readCredential(data.provider);
+          if (!key) return Response.json({ error: "Bitte zuerst den Anbieter in den Einstellungen verbinden." }, { status: 401 });
+          const upstream = await p.providerFetch(data.provider, key, "/chat/completions", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(data.provider ? { model: data.model, messages: data.messages, stream: data.stream, temperature: data.temperature, max_tokens: data.max_tokens } : {}), signal: AbortSignal.any([request.signal, AbortSignal.timeout(120000)]) });
+          if (!upstream.ok) return upstream;
+          const { LIMITS } = await import("@/lib/studio/limits");
+          let size = 0;
+          const bounded = new TransformStream<Uint8Array, Uint8Array>({ transform(chunk, stream) { size += chunk.length; if (size > LIMITS.responseBytes) { stream.error(new Error("Antwort zu groß.")); return; } stream.enqueue(chunk); } });
+          return new Response(upstream.body?.pipeThrough(bounded), { status: upstream.status, headers: { "content-type": upstream.headers.get("content-type") ?? "text/event-stream", "cache-control": "no-store" } });
+        } catch (e) { return p.routeError(e); }
       },
     },
   },
