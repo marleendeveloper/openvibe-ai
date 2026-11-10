@@ -1,5 +1,8 @@
 # Phase 2
 
+- [x] Test the user-requested Nemotron model through the newly created OpenRouter connection. Live catalog showed zero prompt/completion pricing; real completion returned HTTP 200, complete React counter code, finish_reason stop, and reported cost 0.
+- [ ] Link the new OpenRouter connection and complete the in-app coding/preview test. Blocker: the private connection is accessible to the requester but not the project owner; its owner must grant the project owner Can use access under connection Sharing before linking.
+
 - [x] Inspect the existing studio, provider relay, parser, preview, persistence and current workspace connections.
 - [x] Move provider credentials out of browser persistence and into encrypted server-only cookies; validate requests and load live model catalogs.
 - [x] Harden SSE parsing, file operations, project isolation, snapshots and the bounded five-attempt repair loop.
