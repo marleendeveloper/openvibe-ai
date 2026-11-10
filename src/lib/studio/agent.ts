@@ -1,7 +1,7 @@
 import { streamChat, type ChatMsg, type ContentPart } from "./ai";
 import { isRetryableError, RETRY, needsPlan, parsePlan } from "./phase5";
 import { parseFileOps } from "./parse";
-import { useStudio, uid } from "./store";
+import { useStudio, uid, type ResumePoint } from "./store";
 import { useRuntime } from "./runtime";
 import { LIMITS, byteSize } from "./limits";
 import { loadProvider } from "./provider-client";
@@ -34,7 +34,15 @@ async function streamWithRetry(opts: Parameters<typeof streamChat>[0], onRetry: 
 
 const withImages = (text: string, images: string[]): string | ContentPart[] => images.length ? [{ type: "text", text }, ...images.map((url) => ({ type: "image_url" as const, image_url: { url } }))] : text;
 
-export async function runAgent(prompt: string, images: string[] = [], modelOverride?: string): Promise<void> {
+/** Checks that a saved resume point still matches the project and its exact file revision. */
+export function checkResume(resume: ResumePoint, projectId: string, files: Record<string, string>): string | null {
+  if (resume.projectId !== projectId) return "Fortsetzung gehört zu einem anderen Projekt. Bitte den Auftrag neu senden.";
+  if (resume.failedStep < 0 || resume.failedStep >= resume.steps.length || resume.steps.length < 2) return "Fortsetzungspunkt ist ungültig. Bitte den Auftrag neu senden.";
+  if (filesRevision(files) !== resume.revision) return "Dateien wurden seit dem Abbruch verändert. Fortsetzung nicht sicher – bitte den Auftrag neu senden.";
+  return null;
+}
+
+export async function runAgent(prompt: string, images: string[] = [], modelOverride?: string, resume?: ResumePoint): Promise<void> {
   if (useRuntime.getState().busy || !prompt.trim()) return;
   const st = useStudio.getState();
   const s = { ...st.settings, ...(modelOverride ? { model: modelOverride } : {}) };
@@ -43,7 +51,10 @@ export async function runAgent(prompt: string, images: string[] = [], modelOverr
   const projectId = project.id;
   const rt = useRuntime.getState();
   const agent = s.mode === "agent";
-  st.addMessage({ id: uid(), role: "user", content: prompt, ...(images.length ? { images: images.length } : {}) }, projectId);
+  if (resume) {
+    const problem = checkResume(resume, projectId, project.files);
+    if (problem) { st.addMessage({ id: uid(), role: "assistant", content: "", error: problem }, projectId); return; }
+  } else st.addMessage({ id: uid(), role: "user", content: prompt, ...(images.length ? { images: images.length } : {}) }, projectId);
   rt.resetProgress();
   rt.setBusy(true);
   const activeController = new AbortController();
@@ -57,6 +68,7 @@ export async function runAgent(prompt: string, images: string[] = [], modelOverr
     .filter((m) => m.content && m.role !== "system")
     .slice(-10)
     .map((m) => ({ role: m.role as "user" | "assistant", content: m.content }));
+  let failed: { steps: string[]; si: number } | null = null;
   try {
     if (agent && !s.shareProject) throw new Error("Bitte die Übertragung dieses Projekts an den gewählten KI-Anbieter im Chat bestätigen.");
     if (!s.model) throw new Error("Bitte ein Modell in den Einstellungen auswählen.");
@@ -68,8 +80,10 @@ export async function runAgent(prompt: string, images: string[] = [], modelOverr
       { provider: s.provider, model: s.model, temperature: s.temperature, maxTokens: s.maxTokens, zeroCostOnly: s.zeroCostOnly, signal: activeController.signal, messages, onToken },
       (n) => { reset(); rt.step(`Verbindung abgebrochen · Neuer Versuch ${n}/${RETRY.attempts}`); },
     );
-    let steps = [prompt];
-    if (agent && needsPlan(prompt)) {
+    let steps = resume ? resume.steps : [prompt];
+    let si = resume ? resume.failedStep : 0;
+    if (resume) rt.step(`Fortsetzung ab Schritt ${si + 1}/${steps.length}`);
+    if (!resume && agent && needsPlan(prompt)) {
       rt.setPhase("plan");
       rt.step("Großer Auftrag · Plan erstellen");
       let planText = "";
@@ -78,9 +92,10 @@ export async function runAgent(prompt: string, images: string[] = [], modelOverr
       const plan = parsePlan(planText);
       if (plan.length > 1) { steps = plan; rt.step(`Plan: ${plan.length} Schritte`); useStudio.getState().updateMessage(aid, { content: `Plan:\n${plan.map((p, i) => `${i + 1}. ${p}`).join("\n")}` }, projectId); aid = uid(); st.addMessage({ id: aid, role: "assistant", content: "" }, projectId); }
     }
-    for (let si = 0; si < steps.length; si++) {
+    for (; si < steps.length; si++) {
+    failed = { steps, si };
     const stepLabel = steps.length > 1 ? `Schritt ${si + 1}/${steps.length}: ` : "";
-    if (si) { aid = uid(); st.addMessage({ id: aid, role: "assistant", content: "" }, projectId); }
+    if (si && !(resume && si === resume.failedStep)) { aid = uid(); st.addMessage({ id: aid, role: "assistant", content: "" }, projectId); }
     const stepTask = steps.length > 1 ? `Overall goal: ${prompt}\n\nNow implement ONLY step ${si + 1} of ${steps.length}: ${steps[si]}` : prompt;
     const seen = new Set<string>();
     let task = stepTask;
@@ -124,10 +139,15 @@ export async function runAgent(prompt: string, images: string[] = [], modelOverr
     }
     if (!agent || !s.autoApply) break;
     }
+    failed = null;
     rt.setPhase("done");
   } catch (e) {
     const msg = (e as Error).name === "AbortError" ? "Abgebrochen." : (e as Error).message;
-    useStudio.getState().updateMessage(aid, { error: msg }, projectId);
+    const now = useStudio.getState().projects.find((p) => p.id === projectId);
+    // Resume only for multi-step text tasks; images are never stored, so those restart fully.
+    const point: ResumePoint | undefined = failed && failed.steps.length > 1 && !images.length && now
+      ? { prompt, steps: failed.steps, failedStep: failed.si, projectId, revision: filesRevision(now.files) } : undefined;
+    useStudio.getState().updateMessage(aid, { error: msg, ...(point ? { resume: point } : {}) }, projectId);
     rt.step(msg);
     rt.setPhase(null);
   } finally {
