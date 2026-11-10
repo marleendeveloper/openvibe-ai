@@ -39,4 +39,5 @@ Free pricing does not guarantee capacity, an unlimited quota, or account eligibi
 - **Behobener Kontextfehler:** Fehlgeschlagene Assistant-Nachrichten (mit Teilantwort) werden nicht mehr als Kontext an das Modell gesendet. Der zugehörige Test schlug ohne Fix fehl.
 - **Belegte Läufe:** A.1: 81 Tests bestanden (11 Dateien). A.3: 85 Tests bestanden (12 Dateien). TypeScript 0 Fehler, Production Build Exit 0. **Lint nicht bestanden:** vorbestehende Prettier-Formatfehler (agent.ts 75, store.ts 24, Chat.tsx 61, keine neuen); ein vollständiger `eslint .`-Lauf wurde nicht abgeschlossen.
 - **Nachtrag ~17:45 UTC:** Die drei genannten Dateien sind jetzt formatiert (0 Lint-Meldungen). Vollständiger Lint ohne `.oj-cache` abgeschlossen: weiterhin **nicht bestanden** (1084 vorbestehende Fehler in anderen Dateien, siehe `.lovable/plan.md` Abschnitt 10).
-- **Nicht geprüft:** Retry/Fortsetzen mit echtem Anbieter und im Browser; echter Passkey auf einem Gerät, E-Mail-Notfalllink, MCP mit echtem Client.
+- **Nachtrag ~18:20 UTC:** `eslint .` jetzt bestanden (0 Fehler, 11 Warnungen), 87 Tests. Retry und Fortsetzen wurden real mit Nemotron im Browser beobachtet; ein kompletter Mehrschritt-Plan lief wegen wiederholter Nemotron-Abbrüche nicht durch (Abschnitt 11 in `.lovable/plan.md`).
+- **Nicht geprüft:** echter Passkey auf einem Gerät, E-Mail-Notfalllink, MCP mit echtem Client.

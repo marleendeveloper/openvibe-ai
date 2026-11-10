@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const calls: string[] = [];
 let failAt: number | null = null;
+let noOpsAt: number | null = null;
 vi.mock("./provider-client", () => ({ loadProvider: async () => ({ configured: true }) }));
 vi.mock("./ai", () => ({
   streamChat: async (o: {
@@ -16,6 +17,10 @@ vi.mock("./ai", () => ({
     const n = Number(last.match(/step (\d) of 4/)?.[1] ?? 0);
     calls.push(n ? `S${n}` : "single");
     if (n === failAt) throw new Error("Tokenlimit erreicht");
+    if (n === noOpsAt) {
+      o.onToken(n ? "Schritt ist bereits erledigt." : "");
+      return "";
+    }
     const text = `<file path="/S${n}.tsx">export const s${n} = ${n};</file>`;
     o.onToken(text);
     return text;
@@ -36,6 +41,7 @@ const lastResume = () => [...cur().messages].reverse().find((m) => m.error)?.res
 beforeEach(() => {
   calls.length = 0;
   failAt = null;
+  noOpsAt = null;
   useStudio.getState().createProject("Resume", { ...DEFAULT_FILES });
   useStudio.getState().setSettings({
     provider: "openrouter",
@@ -114,5 +120,25 @@ describe("resume failed plan steps", () => {
     await runAgent("Ändere den Titel nochmal.");
     expect(lastResume()).toBeUndefined();
     expect(filesRevision(cur().files)).toBeTruthy();
+  });
+
+  it("a plan step the model reports as already done continues without file changes", async () => {
+    noOpsAt = 2;
+    await runAgent(BIG);
+    expect(calls).toEqual(["S1", "S2", "S3", "S4"]);
+    expect(lastResume()).toBeUndefined();
+    expect(cur().files["/S2.tsx"]).toBeUndefined();
+    expect(useRuntime.getState().progress).toContain(
+      "Schritt 2/4: Keine Dateiänderungen nötig (laut Modell)",
+    );
+  });
+
+  it("a single-step task with no file changes still fails clearly", async () => {
+    noOpsAt = 0;
+    await runAgent("Kleine Änderung");
+    expect(calls).toEqual(["single"]);
+    expect([...cur().messages].reverse().find((m) => m.error)?.error).toMatch(
+      /Keine vollständigen Dateiänderungen/,
+    );
   });
 });
