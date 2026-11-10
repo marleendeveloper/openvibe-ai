@@ -18,8 +18,9 @@ export default defineTool({
     if (!data) throw new ToolError("Projekt nicht gefunden.");
     const files = (data.files ?? {}) as Record<string, string>;
     if (path) {
-      if (!(path in files)) throw new ToolError(`Datei ${path} nicht gefunden.`);
-      return { content: [{ type: "text", text: files[path] }] };
+      const file = files[path];
+      if (typeof file !== "string") throw new ToolError(`Datei ${path} nicht gefunden.`);
+      return { content: [{ type: "text", text: file }] };
     }
     const text = Object.entries(files).map(([p, c]) => `<file path="${p}">\n${c}\n</file>`).join("\n\n");
     return { content: [{ type: "text", text: `Projekt ${data.name}\n\n${text}` }] };

@@ -24,7 +24,7 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
 });
 
 function ConsentPage() {
-  const { user, loading } = useAccount() as { user: { email?: string } | null; loading?: boolean };
+  const { user, loading } = useAccount();
   if (loading) return <div className="grid h-dvh place-items-center"><LoaderCircle className="animate-spin" /></div>;
   if (!user || !isOwnerEmail(user.email)) return <OwnerGate />;
   return <Consent email={user.email!} />;
