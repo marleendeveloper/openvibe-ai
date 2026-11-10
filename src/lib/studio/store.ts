@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ProviderId } from "./providers";
-import type { FileOp } from "./parse";
+import { validateOps, type FileOp } from "./parse";
+import { safePath, validateFiles } from "./limits";
 
 export type Files = Record<string, string>;
 export type Message = {
@@ -11,6 +12,7 @@ export type Message = {
   ops?: FileOp[];
   opsStatus?: "pending" | "applied" | "rejected";
   error?: string;
+  baseFiles?: Files;
 };
 export type Snapshot = { id: string; at: number; label: string; files: Files };
 export type Project = {
@@ -39,7 +41,8 @@ import { createRoot } from "react-dom/client";
 import "./styles.css";
 import App from "./App";
 
-createRoot(document.getElementById("root")!).render(<App />);
+const root = document.getElementById("root");
+if (root) createRoot(root).render(<App />);
 `,
   "/styles.css": `body { margin: 0; font-family: system-ui, sans-serif; }
 `,
@@ -72,8 +75,6 @@ export const DEFAULT_CHAT_PROMPT = `You are a sharp, direct senior software engi
 
 type Settings = {
   provider: ProviderId;
-  keys: Record<ProviderId, string>;
-  customBaseUrl: string;
   model: string;
   customModels: string[];
   temperature: number;
@@ -85,6 +86,7 @@ type Settings = {
   mode: "agent" | "chat";
   autoApply: boolean;
   autoFix: boolean;
+  shareProject: boolean;
 };
 
 type State = {
@@ -101,10 +103,11 @@ type State = {
   writeFile: (path: string, content: string) => void;
   deleteFile: (path: string) => void;
   renameFile: (from: string, to: string) => void;
-  applyOps: (ops: FileOp[], label: string) => void;
+  applyOps: (ops: FileOp[], label: string, projectId?: string) => void;
+  undo: () => void;
   restore: (snapId: string) => void;
-  addMessage: (m: Message) => void;
-  updateMessage: (id: string, patch: Partial<Message>) => void;
+  addMessage: (m: Message, projectId?: string) => void;
+  updateMessage: (id: string, patch: Partial<Message>, projectId?: string) => void;
   clearChat: () => void;
 };
 
@@ -114,7 +117,7 @@ export { uid };
 const newProject = (name: string, files: Files = DEFAULT_FILES): Project => ({
   id: uid(),
   name,
-  files: { ...files },
+  files: validateFiles(files),
   messages: [],
   history: [],
   updatedAt: Date.now(),
@@ -125,16 +128,14 @@ const first = newProject("Mein erstes Projekt");
 export const useStudio = create<State>()(
   persist(
     (set, get) => {
-      const patchCurrent = (fn: (p: Project) => Project) =>
+      const patchCurrent = (fn: (p: Project) => Project, projectId = get().currentId) =>
         set((s) => ({
-          projects: s.projects.map((p) => (p.id === s.currentId ? { ...fn(p), updatedAt: Date.now() } : p)),
+          projects: s.projects.map((p) => (p.id === projectId ? { ...fn(p), updatedAt: Date.now() } : p)),
         }));
       return {
         settings: {
-          provider: "huggingface",
-          keys: { huggingface: "", openrouter: "", custom: "" },
-          customBaseUrl: "",
-          model: "Qwen/Qwen3-Coder-480B-A35B-Instruct",
+          provider: "openrouter",
+          model: "",
           customModels: [],
           temperature: 0.4,
           maxTokens: 8192,
@@ -144,6 +145,7 @@ export const useStudio = create<State>()(
           mode: "agent",
           autoApply: true,
           autoFix: true,
+          shareProject: false,
         },
         projects: [first],
         currentId: first.id,
@@ -151,64 +153,93 @@ export const useStudio = create<State>()(
         setSettings: (s) => set((st) => ({ settings: { ...st.settings, ...s } })),
         createProject: (name, files) => {
           const p = newProject(name, files);
-          set((s) => ({ projects: [p, ...s.projects], currentId: p.id, activeFile: Object.keys(p.files)[0] ?? "/App.tsx" }));
+          set((s) => ({ projects: [p, ...s.projects], currentId: p.id, activeFile: Object.keys(p.files)[0] ?? "/App.tsx", settings: { ...s.settings, shareProject: false } }));
         },
         deleteProject: (id) =>
           set((s) => {
             let projects = s.projects.filter((p) => p.id !== id);
             if (!projects.length) projects = [newProject("Neues Projekt")];
-            return { projects, currentId: s.currentId === id ? projects[0]!.id : s.currentId };
+            return { projects, currentId: s.currentId === id ? (projects[0]?.id ?? s.currentId) : s.currentId };
           }),
         renameProject: (id, name) => set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, name } : p)) })),
         selectProject: (id) => {
           const p = get().projects.find((x) => x.id === id);
-          set({ currentId: id, activeFile: p && p.files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(p?.files ?? {})[0] ?? "" });
+          if (!p) return;
+          set({ currentId: id, activeFile: p.files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(p.files)[0] ?? "", settings: { ...get().settings, shareProject: false } });
         },
         setActiveFile: (activeFile) => set({ activeFile }),
-        writeFile: (path, content) => patchCurrent((p) => ({ ...p, files: { ...p.files, [path]: content } })),
+        writeFile: (path, content) => patchCurrent((p) => ({ ...p, files: validateFiles({ ...p.files, [safePath(path)]: content }) })),
         deleteFile: (path) =>
           patchCurrent((p) => {
+            safePath(path);
+            const snap: Snapshot = { id: uid(), at: Date.now(), label: `Löschen: ${path}`, files: { ...p.files } };
             const files = { ...p.files };
             delete files[path];
-            return { ...p, files };
+            return { ...p, files, history: [snap, ...p.history].slice(0, 30) };
           }),
         renameFile: (from, to) => {
+          safePath(from); safePath(to);
           patchCurrent((p) => {
+            if (p.files[from] === undefined) return p;
+            if (p.files[to] !== undefined) throw new Error("Zieldatei existiert bereits.");
+            const snap: Snapshot = { id: uid(), at: Date.now(), label: `Umbenennen: ${from}`, files: { ...p.files } };
             const files = { ...p.files };
             files[to] = files[from] ?? "";
             delete files[from];
-            return { ...p, files };
+            return { ...p, files: validateFiles(files), history: [snap, ...p.history].slice(0, 30) };
           });
           if (get().activeFile === from) set({ activeFile: to });
         },
-        applyOps: (ops, label) => {
+        applyOps: (ops, label, projectId = get().currentId) => {
+          validateOps(ops);
           patchCurrent((p) => {
-            const snap: Snapshot = { id: uid(), at: Date.now(), label, files: p.files };
+            const snap: Snapshot = { id: uid(), at: Date.now(), label, files: { ...p.files } };
             const files = { ...p.files };
             for (const op of ops) {
               if (op.type === "write") files[op.path] = op.content;
               else delete files[op.path];
             }
-            return { ...p, files, history: [snap, ...p.history].slice(0, 30) };
-          });
+            return { ...p, files: validateFiles(files), history: [snap, ...p.history].slice(0, 30) };
+          }, projectId);
           const w = ops.find((o) => o.type === "write");
-          if (w) set({ activeFile: w.path });
+          if (w && get().currentId === projectId) set({ activeFile: w.path });
         },
+        undo: () => { const p = get().projects.find((p) => p.id === get().currentId); const snap = p?.history[0]; if (snap) get().restore(snap.id); },
         restore: (snapId) =>
           patchCurrent((p) => {
             const snap = p.history.find((h) => h.id === snapId);
             if (!snap) return p;
             const cur: Snapshot = { id: uid(), at: Date.now(), label: "Vor Wiederherstellung", files: p.files };
-            return { ...p, files: snap.files, history: [cur, ...p.history].slice(0, 30) };
+            const files = validateFiles(snap.files);
+            const active = get().activeFile;
+            if (files[active] === undefined) set({ activeFile: Object.keys(files)[0] ?? "" });
+            return { ...p, files, history: [cur, ...p.history].slice(0, 30) };
           }),
-        addMessage: (m) => patchCurrent((p) => ({ ...p, messages: [...p.messages, m] })),
-        updateMessage: (id, patch) =>
-          patchCurrent((p) => ({ ...p, messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)) })),
+        addMessage: (m, projectId) => patchCurrent((p) => ({ ...p, messages: [...p.messages, m] }), projectId),
+        updateMessage: (id, patch, projectId) =>
+          patchCurrent((p) => ({ ...p, messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)) }), projectId),
         clearChat: () => patchCurrent((p) => ({ ...p, messages: [] })),
       };
     },
-    { name: "openvibe-studio", version: 1 },
+    {
+      name: "openvibe-studio", version: 2,
+      migrate: (persisted) => {
+        const old = persisted as { settings?: Record<string, unknown> };
+        if (old.settings) {
+          const { keys: _keys, customBaseUrl: _url, ...settings } = old.settings;
+          old.settings = { ...settings, shareProject: false };
+        }
+        return old;
+      },
+      merge: (persisted, current) => {
+        const data = persisted as Partial<State> | undefined;
+        const projects = data?.projects?.map((p) => {
+          try { return { ...p, files: validateFiles(p.files), history: p.history ?? [], messages: p.messages ?? [] }; } catch { return newProject(p.name); }
+        });
+        return { ...current, ...data, projects: projects?.length ? projects : current.projects, settings: { ...current.settings, ...data?.settings } };
+      },
+    },
   ),
 );
 
-export const useProject = () => useStudio((s) => (s.projects.find((p) => p.id === s.currentId) ?? s.projects[0])!);
+export const useProject = () => useStudio((s) => s.projects.find((p) => p.id === s.currentId) ?? s.projects[0] ?? first);

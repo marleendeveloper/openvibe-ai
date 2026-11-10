@@ -6,25 +6,15 @@ export const PROVIDERS: Record<ProviderId, { name: string; baseUrl: string; keyH
   custom: { name: "OpenAI-kompatibel", baseUrl: "", keyHint: "API-Key" },
 };
 
-export const SUGGESTED_MODELS: Record<ProviderId, string[]> = {
-  huggingface: [
-    "Qwen/Qwen3-Coder-480B-A35B-Instruct",
-    "Qwen/Qwen3-Coder-30B-A3B-Instruct",
-    "Qwen/Qwen2.5-Coder-32B-Instruct",
-    "deepseek-ai/DeepSeek-V3-0324",
-    "deepseek-ai/DeepSeek-R1",
-    "openai/gpt-oss-120b",
-    "openai/gpt-oss-20b",
-    "moonshotai/Kimi-K2-Instruct",
-  ],
-  openrouter: [
-    "qwen/qwen3-coder:free",
-    "deepseek/deepseek-r1:free",
-    "deepseek/deepseek-chat-v3-0324:free",
-    "openai/gpt-oss-120b",
-  ],
-  custom: [],
-};
+export type ModelInfo = { id: string; name: string; free: boolean; context?: number };
+export type ProviderStatus = { configured: boolean; baseUrl: string; models: ModelInfo[]; error?: string };
 
-/** Hosts the server proxy forwards to (avoids browser CORS limits). */
-export const PROXY_HOSTS = ["router.huggingface.co", "openrouter.ai"];
+export function providerError(status: number, detail: string, retryAfter?: string | null): string {
+  const messages: Record<number, string> = {
+    401: "Schlüssel fehlt, ist abgelaufen oder ungültig.",
+    402: "Der Anbieter verlangt Guthaben. Wähle einen anderen Anbieter oder ein verfügbares kostenloses Modell.",
+    403: "Der Anbieter verweigert den Zugriff. Prüfe die Berechtigungen des Schlüssels und des Modells.",
+    429: `Anfragelimit erreicht.${retryAfter ? ` Erneut versuchen nach ${retryAfter}.` : " Bitte später erneut versuchen oder Anbieter wechseln."}`,
+  };
+  return `HTTP ${status}: ${messages[status] ?? (status >= 500 ? "Der Anbieter ist derzeit nicht erreichbar. Bitte später versuchen oder Anbieter wechseln." : "Anfrage fehlgeschlagen.")}\n${detail.slice(0, 2000)}`;
+}

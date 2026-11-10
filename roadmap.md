@@ -1,3 +1,9 @@
-# Tasks
+# Phase 2
 
-- [ ] Test AI coding and preview with Hugging Face, not Lovable AI. Connection created and read-only credential path verified. User approved Qwen/Qwen3.8-27B for testing. Blocked: Hugging Face returned HTTP 402 requiring prepaid Inference Providers credits or PRO; no code was generated, so generated preview remains untested. Resume only after provider billing is resolved.
+- [x] Inspect the existing studio, provider relay, parser, preview, persistence and current workspace connections.
+- [x] Move provider credentials out of browser persistence and into encrypted server-only cookies; validate requests and load live model catalogs.
+- [x] Harden SSE parsing, file operations, project isolation, snapshots and the bounded five-attempt repair loop.
+- [x] Preserve the mobile design; add connection checks, agent progress, undo and data-transfer consent.
+- [x] Run automated mock tests and desktop/mobile browser checks.
+- [ ] Run real external-provider code generation through the preview. Blocker: this workspace has no linked provider connection or external credentials.
+- [x] Write the final technical report with evidence, security limitations and credit balance (`PHASE2-REPORT.md`).

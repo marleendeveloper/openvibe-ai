@@ -1,10 +1,10 @@
-import { PROXY_HOSTS } from "./providers";
+import type { ProviderId } from "./providers";
+import { LIMITS, byteSize } from "./limits";
 
 export type ChatMsg = { role: "system" | "user" | "assistant"; content: string };
 
 export async function streamChat(opts: {
-  baseUrl: string;
-  apiKey: string;
+  provider: ProviderId;
   model: string;
   messages: ChatMsg[];
   temperature?: number;
@@ -12,18 +12,14 @@ export async function streamChat(opts: {
   signal?: AbortSignal;
   onToken: (t: string) => void;
 }): Promise<string> {
-  const target = opts.baseUrl.replace(/\/+$/, "") + "/chat/completions";
-  const host = new URL(target).hostname;
-  const viaProxy = PROXY_HOSTS.includes(host);
-  const res = await fetch(viaProxy ? "/api/public/ai" : target, {
+  const res = await fetch("/api/public/ai", {
     method: "POST",
     signal: opts.signal ?? null,
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${opts.apiKey}`,
-      ...(viaProxy ? { "x-target-url": target } : {}),
     },
     body: JSON.stringify({
+      provider: opts.provider,
       model: opts.model,
       messages: opts.messages,
       stream: true,
@@ -33,44 +29,64 @@ export async function streamChat(opts: {
   });
   if (!res.ok || !res.body) {
     const t = await res.text().catch(() => "");
-    throw new Error(`${res.status}: ${t.slice(0, 400) || res.statusText}`);
+    let message = t;
+    try { message = JSON.parse(t).error ?? t; } catch { /* plain upstream response */ }
+    throw new Error(message || `HTTP ${res.status}: ${res.statusText}`);
+  }
+  if (!res.headers.get("content-type")?.includes("text/event-stream")) {
+    const j = await res.json();
+    const content = j.choices?.[0]?.message?.content;
+    if (j.error || typeof content !== "string") throw new Error(j.error?.message ?? "Ungültige KI-Antwort.");
+    if (byteSize(content) > LIMITS.responseBytes) throw new Error("KI-Antwort ist zu groß.");
+    opts.onToken(content);
+    return content;
   }
   const reader = res.body.getReader();
   const dec = new TextDecoder();
   let buf = "";
   let full = "";
   let inReasoning = false;
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n");
-    buf = lines.pop() ?? "";
-    for (const line of lines) {
-      const l = line.trim();
-      if (!l.startsWith("data:")) continue;
-      const data = l.slice(5).trim();
-      if (data === "[DONE]") continue;
-      try {
-        const j = JSON.parse(data);
-        if (j.error) throw new Error(typeof j.error === "string" ? j.error : j.error.message);
-        const d = j.choices?.[0]?.delta ?? {};
-        const r: string | undefined = d.reasoning_content ?? d.reasoning;
-        if (r) {
-          if (!inReasoning) { opts.onToken("<think>"); inReasoning = true; }
-          opts.onToken(r);
-        }
-        if (d.content) {
-          if (inReasoning) { opts.onToken("</think>"); inReasoning = false; }
-          full += d.content;
-          opts.onToken(d.content);
-        }
-      } catch (e) {
-        if (e instanceof SyntaxError) continue;
-        throw e;
-      }
+  let received = 0;
+  let finished = false;
+  const event = (lines: string[]) => {
+    const data = lines.filter((line) => line.startsWith("data:")).map((line) => line.slice(5).trimStart()).join("\n").trim();
+    if (!data) return;
+    if (data === "[DONE]") { finished = true; return; }
+    let j;
+    try { j = JSON.parse(data); } catch { throw new Error("Ungültiges SSE-Ereignis vom Anbieter."); }
+    if (j.error) throw new Error(typeof j.error === "string" ? j.error : j.error.message);
+    const choice = j.choices?.[0];
+    if (choice?.finish_reason === "length") throw new Error("Tokenlimit erreicht: Antwort unvollständig. Max Tokens erhöhen oder Aufgabe verkleinern.");
+    if (choice?.finish_reason) finished = true;
+    const d = choice?.delta ?? {};
+    const reasoning = d.reasoning_content ?? d.reasoning;
+    if (typeof reasoning === "string" && reasoning) {
+      if (!inReasoning) { opts.onToken("<think>"); inReasoning = true; }
+      opts.onToken(reasoning);
     }
-  }
+    if (typeof d.content === "string") {
+      if (inReasoning) { opts.onToken("</think>"); inReasoning = false; }
+      full += d.content;
+      opts.onToken(d.content);
+    }
+  };
+  let lines: string[] = [];
+  try { for (;;) {
+    if (opts.signal?.aborted) throw new DOMException("Aborted", "AbortError");
+    const { done, value } = await reader.read();
+    received += value?.length ?? 0;
+    if (received > LIMITS.responseBytes) throw new Error("KI-Antwort ist zu groß.");
+    buf += dec.decode(value, { stream: !done });
+    const complete = buf.split("\n");
+    buf = complete.pop() ?? "";
+    for (const line of complete) {
+      const l = line.replace(/\r$/, "");
+      if (!l) { event(lines); lines = []; } else lines.push(l);
+    }
+    if (done) { if (buf) lines.push(buf.replace(/\r$/, "")); if (lines.length) event(lines); break; }
+  } } finally { await reader.cancel().catch(() => undefined); reader.releaseLock(); }
   if (inReasoning) opts.onToken("</think>");
+  if (!finished) throw new Error("KI-Verbindung wurde vor Abschluss unterbrochen. Keine Dateien angewendet.");
+  if (!full.trim()) throw new Error("Der Anbieter hat keinen Antworttext geliefert.");
   return full;
 }

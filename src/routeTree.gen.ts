@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicAiRouteImport } from './routes/api/public/ai'
+import { Route as ApiPublicProviderRouteImport } from './routes/api/public/provider'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const ApiPublicAiRoute = ApiPublicAiRouteImport.update({
   path: '/api/public/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicProviderRoute = ApiPublicProviderRouteImport.update({
+  id: '/api/public/provider',
+  path: '/api/public/provider',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/public/ai': typeof ApiPublicAiRoute
+  '/api/public/provider': typeof ApiPublicProviderRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/ai'
+  fullPaths: '/' | '/api/public/ai' | '/api/public/provider'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/ai'
-  id: '__root__' | '/' | '/api/public/ai'
+  to: '/' | '/api/public/ai' | '/api/public/provider'
+  id: '__root__' | '/' | '/api/public/ai' | '/api/public/provider'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPublicAiRoute: typeof ApiPublicAiRoute
+  ApiPublicProviderRoute: typeof ApiPublicProviderRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/provider': {
+      id: '/api/public/provider'
+      path: '/api/public/provider'
+      fullPath: '/api/public/provider'
+      preLoaderRoute: typeof ApiPublicProviderRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPublicAiRoute: ApiPublicAiRoute,
+  ApiPublicProviderRoute: ApiPublicProviderRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

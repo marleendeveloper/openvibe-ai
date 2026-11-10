@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Send, Square, Check, X, History, Eraser, Bot, MessageSquare } from "lucide-react";
+import { Send, Square, Check, X, History, Eraser, Bot, MessageSquare, Undo2 } from "lucide-react";
+import { PROVIDERS } from "@/lib/studio/providers";
 import { useProject, useStudio, type Message } from "@/lib/studio/store";
 import { useRuntime } from "@/lib/studio/runtime";
 import { runAgent, stopAgent, applyMessageOps } from "@/lib/studio/agent";
@@ -21,9 +22,9 @@ function Bubble({ m }: { m: Message }) {
   return (
     <div className="max-w-full space-y-2 text-sm">
       {think && (
-        <button onClick={() => setShowThink(!showThink)} className="text-xs text-muted-foreground hover:text-foreground">
+        <Btn onClick={() => setShowThink(!showThink)} className="text-xs">
           {showThink ? "▾" : "▸"} Gedankengang
-        </button>
+        </Btn>
       )}
       {showThink && think && <pre className="max-h-60 overflow-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap text-muted-foreground">{think}</pre>}
       {body ? <div className="whitespace-pre-wrap leading-relaxed">{body}</div> : !m.error && <span className="animate-pulse text-primary">●●●</span>}
@@ -38,7 +39,7 @@ function Bubble({ m }: { m: Message }) {
           </ul>
           {m.opsStatus === "pending" && (
             <div className="mt-2 flex gap-2">
-              <Btn variant="primary" onClick={() => applyMessageOps(m.id)}><Check size={14} /> Anwenden</Btn>
+              <Btn variant="primary" onClick={() => { try { applyMessageOps(m.id); } catch (e) { updateMessage(m.id, { error: (e as Error).message }); } }}><Check size={14} /> Anwenden</Btn>
               <Btn variant="outline" onClick={() => updateMessage(m.id, { opsStatus: "rejected" })}><X size={14} /> Verwerfen</Btn>
             </div>
           )}
@@ -50,8 +51,9 @@ function Bubble({ m }: { m: Message }) {
 
 export function Chat() {
   const project = useProject();
-  const { settings, setSettings, clearChat, restore } = useStudio();
+  const { settings, setSettings, clearChat, restore, undo } = useStudio();
   const busy = useRuntime((s) => s.busy);
+  const progress = useRuntime((s) => s.progress);
   const [input, setInput] = useState("");
   const [showHistory, setShowHistory] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -78,10 +80,19 @@ export function Chat() {
           <input type="checkbox" checked={settings.autoFix} onChange={(e) => setSettings({ autoFix: e.target.checked })} className="accent-primary" /> Auto-Fix
         </label>
         <div className="ml-auto flex">
+          <Btn title="Letzte Änderung rückgängig" disabled={busy || !project.history.length} onClick={undo}><Undo2 size={15} /></Btn>
           <Btn title="Änderungshistorie" onClick={() => setShowHistory(!showHistory)} className={cn(showHistory && "text-primary")}><History size={15} /></Btn>
           <Btn title="Chat leeren" onClick={() => confirm("Chatverlauf leeren?") && clearChat()}><Eraser size={15} /></Btn>
         </div>
       </div>
+      {settings.mode === "agent" && <label className="flex items-start gap-2 border-b px-3 py-2 text-xs text-muted-foreground">
+        <input type="checkbox" checked={settings.shareProject} onChange={(e) => setSettings({ shareProject: e.target.checked })} className="mt-0.5 accent-primary" />
+        <span>Projektdateien und letzte Chatnachrichten an {PROVIDERS[settings.provider].name} senden. Projekte bleiben lokal; die Vorschau nutzt Sandpack-Dienste.</span>
+      </label>}
+      {progress.length > 0 && <details className="border-b px-3 py-2 text-xs" open={busy}>
+        <summary className="cursor-pointer text-primary break-words">{progress[progress.length - 1]}</summary>
+        <ol className="mt-2 space-y-1 text-muted-foreground">{progress.slice(0, -1).map((step, i) => <li key={i}>{i + 1}. {step}</li>)}</ol>
+      </details>}
 
       {showHistory && (
         <div className="max-h-56 overflow-auto border-b bg-panel p-2 text-xs">
@@ -90,7 +101,7 @@ export function Chat() {
             <div key={h.id} className="flex items-center gap-2 py-1">
               <span className="text-muted-foreground">{new Date(h.at).toLocaleTimeString()}</span>
               <span className="flex-1 truncate">{h.label}</span>
-              <Btn className="h-6" variant="outline" onClick={() => confirm("Diesen Stand wiederherstellen?") && restore(h.id)}>Wiederherstellen</Btn>
+              <Btn className="h-6" disabled={busy} variant="outline" onClick={() => confirm("Diesen Stand wiederherstellen?") && restore(h.id)}>Wiederherstellen</Btn>
             </div>
           ))}
         </div>
@@ -120,7 +131,7 @@ export function Chat() {
           {busy ? (
             <Btn variant="danger" className="h-10 w-10" onClick={stopAgent} title="Stopp"><Square size={16} /></Btn>
           ) : (
-            <Btn variant="primary" className="h-10 w-10" onClick={send} disabled={!input.trim()} title="Senden (⌘/Strg+Enter)"><Send size={16} /></Btn>
+            <Btn variant="primary" className="h-10 w-10 shrink-0" onClick={send} disabled={!input.trim() || (settings.mode === "agent" && !settings.shareProject)} title="Senden (⌘/Strg+Enter)"><Send size={16} /></Btn>
           )}
         </div>
         <p className="mt-1 truncate px-1 font-mono text-[11px] text-muted-foreground">{settings.model}</p>

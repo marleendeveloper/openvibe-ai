@@ -8,6 +8,8 @@ import { Preview } from "./Preview";
 import { Settings } from "./Settings";
 import { Btn } from "./ui";
 import { cn } from "@/lib/utils";
+import { useRuntime } from "@/lib/studio/runtime";
+import { loadProvider } from "@/lib/studio/provider-client";
 
 type Tab = "files" | "chat" | "code" | "preview";
 
@@ -16,7 +18,8 @@ export default function Studio() {
   const [rightTab, setRightTab] = useState<"preview" | "code">("preview");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { settings } = useStudio();
-  const hasKey = !!settings.keys[settings.provider];
+  const hasKey = useRuntime((s) => s.connected[settings.provider]);
+  useEffect(() => { loadProvider(settings.provider).then((s) => useRuntime.getState().setConnected(settings.provider, s.configured)).catch(() => undefined); }, [settings.provider]);
   const [isDesktop, setIsDesktop] = useState(true);
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)");
@@ -28,7 +31,7 @@ export default function Studio() {
 
   const header = (
     <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-panel px-3">
-      <span className="font-mono text-sm font-bold tracking-tight"><span className="text-primary">▲</span> OpenVibe</span>
+      <span className="shrink-0 font-mono text-sm font-bold"><span className="text-primary">▲</span> OpenVibe</span>
       <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">· {settings.model}</span>
       <div className="ml-auto flex items-center gap-1">
         {!hasKey && <Btn variant="primary" onClick={() => setSettingsOpen(true)}><KeyRound size={14} /> API-Key setzen</Btn>}
@@ -41,7 +44,7 @@ export default function Studio() {
     return (
       <div className="flex h-dvh flex-col">
         {header}
-        <div className="grid min-h-0 flex-1 grid-cols-[240px_minmax(360px,1fr)_minmax(420px,1.3fr)]">
+        <div className="grid min-h-0 flex-1 grid-cols-[200px_minmax(280px,1fr)_minmax(320px,1.3fr)]">
           <aside className="min-h-0 border-r"><FileTree onOpen={() => setRightTab("code")} /></aside>
           <section className="min-h-0 border-r"><Chat /></section>
           <section className="flex min-h-0 flex-col">
@@ -77,9 +80,9 @@ export default function Studio() {
       </main>
       <nav className="grid shrink-0 grid-cols-4 border-t bg-panel pb-[env(safe-area-inset-bottom)]">
         {tabs.map((t) => (
-          <button key={t.id} onClick={() => setMobileTab(t.id)} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px]", mobileTab === t.id ? "text-primary" : "text-muted-foreground")}>
+          <Btn key={t.id} onClick={() => setMobileTab(t.id)} className={cn("h-14 flex-col gap-0.5 rounded-none py-2 text-[11px]", mobileTab === t.id ? "text-primary" : "text-muted-foreground")}>
             <t.icon size={19} />{t.label}
-          </button>
+          </Btn>
         ))}
       </nav>
       {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
