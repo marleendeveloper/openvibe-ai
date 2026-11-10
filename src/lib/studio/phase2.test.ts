@@ -72,6 +72,15 @@ describe("project rules", () => {
     const old = migrate?.({ settings: { keys: { openrouter: "not-a-real-key" }, model: "m" } }, 1) as { settings: Record<string, unknown> };
     expect(old.settings["keys"]).toBeUndefined();
   });
+  it("requires renewed project-sharing consent when switching projects", () => {
+    const st = useStudio.getState();
+    const original = st.currentId;
+    st.createProject("Private other");
+    expect(useStudio.getState().settings.shareProject).toBe(false);
+    st.setSettings({ shareProject: true });
+    st.selectProject(original);
+    expect(useStudio.getState().settings.shareProject).toBe(false);
+  });
 });
 
 describe("streaming and agent", () => {

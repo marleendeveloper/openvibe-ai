@@ -153,7 +153,7 @@ export const useStudio = create<State>()(
         setSettings: (s) => set((st) => ({ settings: { ...st.settings, ...s } })),
         createProject: (name, files) => {
           const p = newProject(name, files);
-          set((s) => ({ projects: [p, ...s.projects], currentId: p.id, activeFile: Object.keys(p.files)[0] ?? "/App.tsx" }));
+          set((s) => ({ projects: [p, ...s.projects], currentId: p.id, activeFile: Object.keys(p.files)[0] ?? "/App.tsx", settings: { ...s.settings, shareProject: false } }));
         },
         deleteProject: (id) =>
           set((s) => {
@@ -165,7 +165,7 @@ export const useStudio = create<State>()(
         selectProject: (id) => {
           const p = get().projects.find((x) => x.id === id);
           if (!p) return;
-          set({ currentId: id, activeFile: p && p.files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(p?.files ?? {})[0] ?? "" });
+          set({ currentId: id, activeFile: p.files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(p.files)[0] ?? "", settings: { ...get().settings, shareProject: false } });
         },
         setActiveFile: (activeFile) => set({ activeFile }),
         writeFile: (path, content) => patchCurrent((p) => ({ ...p, files: validateFiles({ ...p.files, [safePath(path)]: content }) })),
