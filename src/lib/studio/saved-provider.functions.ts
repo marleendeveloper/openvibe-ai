@@ -1,8 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
-import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { requireOwner } from "./owner-middleware";
 
 export const useSavedOpenRouter = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .handler(async () => {
     const { getRequest } = await import("@tanstack/react-start/server");
     const { saveCredential, GATEWAY_MARKER } = await import("./provider.server");
@@ -15,7 +15,7 @@ export const useSavedOpenRouter = createServerFn({ method: "POST" })
 export const AUTO_KEY_EMAILS = ["marleendeveloper@gmail.com"];
 
 export const autoConnectSavedOpenRouter = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
+  .middleware([requireOwner])
   .handler(async ({ context }) => {
     const email = String((context.claims as { email?: string }).email ?? "").toLowerCase();
     if (!AUTO_KEY_EMAILS.includes(email)) return { configured: false };
