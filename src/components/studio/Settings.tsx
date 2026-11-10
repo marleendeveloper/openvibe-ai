@@ -1,52 +1,90 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, RefreshCw, KeyRound, PlugZap, Trash2 } from "lucide-react";
 import { useStudio, DEFAULT_AGENT_PROMPT, DEFAULT_CHAT_PROMPT } from "@/lib/studio/store";
-import { PROVIDERS, SUGGESTED_MODELS, type ProviderId } from "@/lib/studio/providers";
+import { PROVIDERS, type ProviderId, type ProviderStatus } from "@/lib/studio/providers";
+import { configureProvider, loadProvider } from "@/lib/studio/provider-client";
+import { useRuntime } from "@/lib/studio/runtime";
 import { Btn } from "./ui";
 
 export function Settings({ onClose }: { onClose: () => void }) {
   const { settings: s, setSettings } = useStudio();
   const [newModel, setNewModel] = useState("");
-  const models = [...SUGGESTED_MODELS[s.provider], ...s.customModels];
+  const [key, setKey] = useState("");
+  const [status, setStatus] = useState<ProviderStatus | null>(null);
+  const [notice, setNotice] = useState("");
+  const [working, setWorking] = useState(false);
+  const [freeOnly, setFreeOnly] = useState(true);
+  const models = (status?.models ?? []).filter((m) => s.provider !== "openrouter" || !freeOnly || m.free);
+  const modelIds = [...new Set([...models.map((m) => m.id), ...s.customModels])];
+  const refresh = async () => {
+    setWorking(true); setNotice("");
+    try {
+      const result = await loadProvider(s.provider);
+      setStatus(result); useRuntime.getState().setConnected(s.provider, result.configured);
+      if (result.error) setNotice(result.error);
+    } catch (e) { setNotice((e as Error).message); } finally { setWorking(false); }
+  };
+  useEffect(() => {
+    let active = true;
+    setKey(""); setStatus(null); setNotice("");
+    loadProvider(s.provider).then((result) => { if (!active) return; setStatus(result); useRuntime.getState().setConnected(s.provider, result.configured); if (result.error) setNotice(result.error); }).catch((e) => { if (active) setNotice(e.message); });
+    return () => { active = false; };
+  }, [s.provider]);
+  const action = async (kind: "save" | "remove" | "test") => {
+    setWorking(true); setNotice("");
+    try {
+      await configureProvider(s.provider, kind, kind === "save" ? { key } : { model: s.model });
+      setKey("");
+      const result = await loadProvider(s.provider);
+      setStatus(result); useRuntime.getState().setConnected(s.provider, result.configured);
+      setNotice(kind === "test" ? `Modell ${s.model}: echte Anfrage erfolgreich.` : kind === "save" ? "Schlüssel sicher gespeichert. Modell wählen und Verbindung testen." : "Schlüssel entfernt.");
+    } catch (e) { setNotice((e as Error).message); } finally { setWorking(false); }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-background/70 backdrop-blur-sm md:items-center" onClick={onClose}>
       <div className="max-h-[92dvh] w-full max-w-xl overflow-auto rounded-t-xl border bg-card p-5 md:rounded-xl" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center">
           <h2 className="text-lg font-semibold">Einstellungen</h2>
-          <Btn className="ml-auto" onClick={onClose}><X size={18} /></Btn>
+          <Btn className="ml-auto" title="Einstellungen schließen" onClick={onClose}><X size={18} /></Btn>
         </div>
         <div className="space-y-4 text-sm">
           <label className="block space-y-1">
             <span className="text-muted-foreground">Provider</span>
             <select className="field" value={s.provider} onChange={(e) => {
               const p = e.target.value as ProviderId;
-              setSettings({ provider: p, model: SUGGESTED_MODELS[p][0] ?? s.model });
+              setSettings({ provider: p, model: "" });
             }}>
               {(Object.keys(PROVIDERS) as ProviderId[]).map((p) => <option key={p} value={p}>{PROVIDERS[p].name}</option>)}
             </select>
           </label>
-          {s.provider === "custom" && (
-            <label className="block space-y-1">
-              <span className="text-muted-foreground">Base-URL (OpenAI-kompatibel, CORS nötig)</span>
-              <input className="field font-mono" placeholder="https://api.example.com/v1" value={s.customBaseUrl} onChange={(e) => setSettings({ customBaseUrl: e.target.value })} />
-            </label>
-          )}
+          {s.provider === "custom" && <p className="text-xs text-muted-foreground">Server-Endpunkt: {status?.baseUrl || "Noch nicht konfiguriert (OPENVIBE_CUSTOM_BASE_URL)"}</p>}
           <label className="block space-y-1">
             <span className="text-muted-foreground">API-Key für {PROVIDERS[s.provider].name}</span>
-            <input type="password" autoComplete="off" className="field font-mono" placeholder={PROVIDERS[s.provider].keyHint} value={s.keys[s.provider]} onChange={(e) => setSettings({ keys: { ...s.keys, [s.provider]: e.target.value } })} />
-            <span className="block text-xs text-muted-foreground">Wird nur in diesem Browser gespeichert und direkt an den Anbieter weitergereicht.</span>
+            <input aria-label="API-Key" type="password" autoComplete="off" className="field font-mono" placeholder={PROVIDERS[s.provider].keyHint} value={key} onChange={(e) => setKey(e.target.value)} />
+            <span className="block text-xs text-muted-foreground">{status?.configured ? "Schlüssel hinterlegt" : "Kein Schlüssel hinterlegt"} · verschlüsselt, für JavaScript unlesbar · 30 Tage</span>
           </label>
+          <div className="flex flex-wrap gap-2">
+            <Btn variant="primary" disabled={working || !key} onClick={() => void action("save")}><KeyRound size={14} /> Sicher speichern</Btn>
+            <Btn variant="outline" disabled={working || !status?.configured || !s.model} onClick={() => void action("test")}><PlugZap size={14} /> Verbindung testen</Btn>
+            <Btn title="Schlüssel entfernen" disabled={working || !status?.configured} onClick={() => void action("remove")}><Trash2 size={14} /></Btn>
+          </div>
+          {notice && <p role="status" className="break-words whitespace-pre-wrap border-l-2 border-primary pl-2 text-xs">{notice}</p>}
           <label className="block space-y-1">
             <span className="text-muted-foreground">Modell</span>
             <input className="field font-mono" list="models" value={s.model} onChange={(e) => setSettings({ model: e.target.value })} />
-            <datalist id="models">{models.map((m) => <option key={m} value={m} />)}</datalist>
-            <div className="flex flex-wrap gap-1 pt-1">
-              {models.map((m) => (
-                <button key={m} onClick={() => setSettings({ model: m })} className={`rounded border px-1.5 py-0.5 font-mono text-[11px] ${m === s.model ? "border-primary text-primary" : "text-muted-foreground"}`}>{m.split("/").pop()}</button>
-              ))}
-            </div>
+            <datalist id="models">{modelIds.map((m) => <option key={m} value={m} />)}</datalist>
           </label>
+          <div className="flex items-center gap-2">
+            {s.provider === "openrouter" && <label className="flex flex-1 items-center gap-2 text-xs"><input type="checkbox" checked={freeOnly} onChange={(e) => setFreeOnly(e.target.checked)} /> Nur aktuell ohne Tokenpreis</label>}
+            <Btn title="Modellkatalog aktualisieren" disabled={working} onClick={() => void refresh()}><RefreshCw size={14} /></Btn>
+          </div>
+          <select aria-label="Modellkatalog" className="field" value={modelIds.includes(s.model) ? s.model : ""} onChange={(e) => setSettings({ model: e.target.value })}>
+            <option value="">Modell aus aktuellem Katalog wählen</option>
+            {models.map((m) => <option key={m.id} value={m.id}>{m.name}{m.free ? " · 0 Tokenpreis" : ""}</option>)}
+            {s.customModels.filter((id) => !models.some((m) => m.id === id)).map((id) => <option key={id} value={id}>{id}</option>)}
+          </select>
+          <p className="text-xs text-muted-foreground">0 Tokenpreis garantiert keine Verfügbarkeit oder freien Kontingente. Verbindungstest sendet eine kurze Anfrage.</p>
           <div className="flex gap-2">
             <input className="field font-mono" placeholder="Eigenes Modell merken: org/model" value={newModel} onChange={(e) => setNewModel(e.target.value)} />
             <Btn variant="outline" className="h-auto" onClick={() => { if (newModel.trim()) { setSettings({ customModels: [...new Set([...s.customModels, newModel.trim()])], model: newModel.trim() }); setNewModel(""); } }}>Merken</Btn>
@@ -58,7 +96,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
             </label>
             <label className="block space-y-1">
               <span className="text-muted-foreground">Max Tokens</span>
-              <input type="number" className="field" value={s.maxTokens} onChange={(e) => setSettings({ maxTokens: +e.target.value || 4096 })} />
+              <input type="number" min={128} max={32768} className="field" value={s.maxTokens} onChange={(e) => setSettings({ maxTokens: Math.min(32768, Math.max(128, +e.target.value || 4096)) })} />
             </label>
           </div>
           <label className="block space-y-1">
@@ -66,11 +104,11 @@ export function Settings({ onClose }: { onClose: () => void }) {
             <textarea rows={3} className="field font-mono text-xs" value={s.modelPrompts[s.model] ?? ""} onChange={(e) => setSettings({ modelPrompts: { ...s.modelPrompts, [s.model]: e.target.value } })} />
           </label>
           <label className="block space-y-1">
-            <span className="flex text-muted-foreground">Agent-Systemprompt <button className="ml-auto text-xs underline" onClick={() => setSettings({ agentPrompt: DEFAULT_AGENT_PROMPT })}>Zurücksetzen</button></span>
+            <span className="flex text-muted-foreground">Agent-Systemprompt <Btn className="ml-auto text-xs" onClick={() => setSettings({ agentPrompt: DEFAULT_AGENT_PROMPT })}>Zurücksetzen</Btn></span>
             <textarea rows={6} className="field font-mono text-xs" value={s.agentPrompt} onChange={(e) => setSettings({ agentPrompt: e.target.value })} />
           </label>
           <label className="block space-y-1">
-            <span className="flex text-muted-foreground">Chat-Systemprompt <button className="ml-auto text-xs underline" onClick={() => setSettings({ chatPrompt: DEFAULT_CHAT_PROMPT })}>Zurücksetzen</button></span>
+            <span className="flex text-muted-foreground">Chat-Systemprompt <Btn className="ml-auto text-xs" onClick={() => setSettings({ chatPrompt: DEFAULT_CHAT_PROMPT })}>Zurücksetzen</Btn></span>
             <textarea rows={3} className="field font-mono text-xs" value={s.chatPrompt} onChange={(e) => setSettings({ chatPrompt: e.target.value })} />
           </label>
         </div>
