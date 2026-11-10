@@ -31,3 +31,7 @@
 - `ai.ts` and the `/api/public/ai` schema: messages may carry OpenAI-style content parts (`text` and `image_url` data URLs), validated server-side for MIME type, size and count. `provider.server.ts` checks the model's `architecture.input_modalities` contains `image`, in addition to the existing zero-cost check.
 - New `templates.ts` (static file sets) plus a `createFromTemplate` store action. The welcome screen goes in `Chat.tsx`.
 - Animations use tw-animate-css classes plus keyframes in `styles.css`, behind `prefers-reduced-motion`. Only semantic tokens.
+
+## Korrektur 10.11.2026, ~17:20 UTC
+
+Der Punkt „Ein neuer Versuch schickt dann nur den noch offenen Teil“ wurde so **nicht umgesetzt**. Tatsächlich: Der automatische Retry wiederholt nach Transportfehlern denselben vollständigen Schritt und verwirft Teilantworten. Seit A.1 setzt „Ab Schritt N fortsetzen“ bei einem gespeicherten fehlgeschlagenen Plan-Schritt an. Beides ist nur durch Mock-Tests belegt, nicht durch einen aktuellen echten Anbieter- oder Browserlauf. Seit A.3 werden fehlgeschlagene Teilantworten nicht mehr als Modellkontext gesendet.

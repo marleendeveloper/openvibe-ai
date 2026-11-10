@@ -35,7 +35,7 @@
 - [x] Synchronize session state across studio, review and account controls; clear provider cookies on logout.
 - [x] Test mobile/desktop registration controls, reserved-email rejection, reset view, profile validation and live schema/policies.
 - [x] Verify an authenticated account, profile save and readback, and in-app Gateway review on mobile with a desktop rendering check.
-- [ ] Test registration confirmation and login/logout roundtrip. Blocker: restored test session does not exercise the original registration/login flow; user's active account was not signed out.
+- [~] Entfallen (nicht getestet): Registrierungs-Rundlauf – Registrierung ist seit Phase 6 (Nur-Entwickler-Zugang) abgeschaltet.
 - [x] Complete OpenRouter end-to-end… done: linked OpenRouter connection; Nemotron generated counter (desktop) and todo list (mobile), applied, preview verified incl. adding an item.
 
 # Phase 4
@@ -44,7 +44,7 @@
 - [x] Chat-Verlauf pro Projekt in der Datenbank, beim Laden wiederhergestellt (mit Testnachricht auf dem Handy geprüft).
 - [x] Apps veröffentlichen: öffentlicher Link /p/<name>, öffentliche Ansicht ohne Anmeldung, Aktualisieren und Zurücknehmen geprüft.
 - [x] Tests: 55 automatische Prüfungen fehlerfrei; Handy-Browserprüfung von Speichern, Laden, Verlauf, Veröffentlichen und Zurücknehmen.
-- [ ] Anmelde-Rundlauf mit der E-Mail des Nutzers: Registrierung, Bestätigung, Login, Logout. Blocker: Nutzer muss sich selbst registrieren; danach prüfe ich den Rundlauf.
+- [~] Entfallen (nicht getestet): Anmelde-Rundlauf mit Registrierung – Registrierung ist seit Phase 6 abgeschaltet.
 
 # End-to-end brief (real Nemotron, mobile)
 
@@ -57,7 +57,14 @@
 - [x] Passkey-Anmeldung hinzufügen und nur ein Konto (Besitzerin) zulassen; dort alle Features + verbundener API-Key
 - [x] Phase 5: Retries, Schrittplan, Bilder, Vorlagen, Startbildschirm, Chat-Design, Animationen
 
-## Qualitätsprogramm Phase A
-- [x] A.1 „Erneut versuchen“ setzt beim fehlgeschlagenen Plan-Schritt fort (Mock-Tests, nicht real im Studio geprüft)
-- [x] A.3 Retry-Test mit Mock-Stream, der einmal abbricht; Teilantworten nicht mehr als Kontext gesendet (nur Mock)
-- [ ] Echter Fortsetzungstest mit Nemotron (braucht Anmeldung als Marleen oder Justin)
+## Qualitätsprogramm Phase A (Stand ~17:20 UTC)
+- [x] A.1 Fortsetzen ab fehlgeschlagenem Plan-Schritt mit Projekt-/Revisionsprüfung (nur Mock-Tests, 81 Tests)
+- [x] A.2 Berichte/Plan auf belegten Stand gebracht; PHASE2/3 als historisch markiert
+- [x] A.3 Retry-Test mit abbrechendem Mock-Stream; Teilantworten nicht mehr als Kontext (nur Mock, 85 Tests)
+- [ ] Echter Retry-/Fortsetzungstest mit Nemotron im Studio. Blocker: Freigabe zur Anmeldung als Marleen oder Justin
+- [ ] Prettier-Altlasten beheben und vollständigen Lint-Lauf abschließen
+
+## Phase B/C (offen)
+- [ ] Passkey auf echtem Gerät, E-Mail-Notfalllink, MCP mit echtem Client (Nutzeraktionen nötig)
+- [ ] Browserprüfung: 4 weitere Vorlagen, Bild-Auftrag mit Vorschau, Desktop 1280 px, Reduced Motion
+- [ ] CI; GitHub-Sicherung vorerst zurückgestellt

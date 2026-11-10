@@ -1,5 +1,7 @@
 # OpenVibe – Phase-2-Bericht
 
+> **Historischer Bericht** vom damaligen Prüfzeitpunkt. Aktueller Stand: Abschnitt „Aktualisierung“ am Ende und `.lovable/plan.md`.
+
 Stand: 10. November 2026. Phase 2 ist technisch wesentlich weiterentwickelt, aber die Definition of Done ist ohne erfolgreichen echten KI-Anbieter-Test noch nicht vollständig erreicht.
 
 ## Bestandsaufnahme
@@ -77,3 +79,13 @@ Erste Abfrage dieser Phase: 113,60 Credits verfügbar. Letzte Abfrage: 103,50 Cr
 ## Offener Abschluss
 
 Ein gültiger externer Anbieterzugang fehlt. Sobald ein gültiger OpenRouter- oder Hugging-Face-Schlüssel im Studio hinterlegt ist, muss derselbe Ablauf mit einem tatsächlich verfügbaren Modell erneut durchgeführt werden. Erst dieser erfolgreiche reale Smartphone-Test erfüllt die vollständige Definition of Done. Keine erfolgreiche reale Modellanfrage behauptet und kein kostenpflichtiger Dienst vorausgesetzt.
+## Aktualisierung 10.11.2026, ~17:20 UTC (Qualitätsprogramm A.1–A.3)
+
+> Die Abschnitte oben sind ein **historischer Bericht vom damaligen Prüfzeitpunkt** und wurden nicht rückwirkend geändert.
+
+- **Echte Provider-Tests (historisch, nach diesem Bericht):** Über die verknüpfte OpenRouter-Verbindung hat Nemotron reale Aufträge umgesetzt (Zähler, Todo-Liste, Notizen mit Reparatur und Rückgängig, Wetter-Karte, RaveSafe-Seite im 3. Versuch). Diese Läufe wurden **im aktuellen Programm nicht erneut ausgeführt**.
+- **Automatischer Retry (implementiert, Mock-getestet):** Nach Transportfehlern wird **derselbe vollständige Schritt** bis zu 2-mal neu angefragt; Teilantworten werden verworfen und nie angewendet. Kein Weiterschreiben „nur des offenen Teils“.
+- **Fortsetzen (implementiert, Mock-getestet):** Scheitert ein Mehrschritt-Auftrag, speichert die Fehlermeldung Plan, fehlgeschlagenen Schritt, Projekt-ID und Datei-Revision. „Ab Schritt N fortsetzen“ startet dort, nur bei gleichem Projekt und identischer Revision; sonst klare Abbruchmeldung. Aufträge mit Bildern und Einzelschritt-Aufträge starten komplett neu.
+- **Behobener Kontextfehler:** Fehlgeschlagene Assistant-Nachrichten (mit Teilantwort) werden nicht mehr als Kontext an das Modell gesendet. Der zugehörige Test schlug ohne Fix fehl.
+- **Belegte Läufe:** A.1: 81 Tests bestanden (11 Dateien). A.3: 85 Tests bestanden (12 Dateien). TypeScript 0 Fehler, Production Build Exit 0. **Lint nicht bestanden:** vorbestehende Prettier-Formatfehler (agent.ts 75, store.ts 24, Chat.tsx 61, keine neuen); ein vollständiger `eslint .`-Lauf wurde nicht abgeschlossen.
+- **Nicht geprüft:** Retry/Fortsetzen mit echtem Anbieter und im Browser; echter Passkey auf einem Gerät, E-Mail-Notfalllink, MCP mit echtem Client.
