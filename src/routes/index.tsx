@@ -1,23 +1,31 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, ClientOnly } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
+const Studio = lazy(() => import("@/components/studio/Studio"));
+
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "OpenVibe – Private AI Coding Studio" },
+      { name: "description", content: "Privates Vibe-Coding-Studio mit freier Modellwahl über Hugging Face und OpenRouter." },
+      { property: "og:title", content: "OpenVibe – Private AI Coding Studio" },
+      { property: "og:description", content: "Websites und Apps per natürlicher Sprache bauen, mit Live-Preview." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+const Loading = () => <div className="grid h-dvh place-items-center font-mono text-sm text-primary">openvibe://booting…</div>;
+
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <ClientOnly fallback={<Loading />}>
+      <Suspense fallback={<Loading />}>
+        <Studio />
+      </Suspense>
+    </ClientOnly>
   );
 }
