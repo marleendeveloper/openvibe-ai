@@ -71,3 +71,11 @@ Dies ist eine reine Leseprüfung. Es wurden keine Dateien, Pakete oder Datenbank
 ## 6. Kleinster sinnvoller nächster Schritt
 
 Phase A, Punkt 1: Den Plan und den Index des fehlgeschlagenen Schritts in der Nachricht speichern. „Erneut versuchen“ startet dann ab diesem Schritt. Dazu ein Unit-Test. Betroffen sind nur `agent.ts`, `Chat.tsx` und ein neuer Test.
+
+## 7. Umsetzung Phase A.1 (10.11.2026, 17:10 UTC)
+
+- **Geändert:** `agent.ts` (`checkResume`, `runAgent(..., resume)`), `store.ts` (`Message.resume`, `ResumePoint`), `Chat.tsx` (Knopf „Ab Schritt N fortsetzen“), neu `resume.test.ts`.
+- **Verhalten:** Bei Fehler in einem Mehrschritt-Auftrag speichert die Fehlermeldung Plan, Index des fehlgeschlagenen Schritts, Projekt-ID und Datei-Revision. Fortsetzung nur bei gleicher Projekt-ID und identischer Revision, sonst klare Abbruchmeldung ohne KI-Aufruf. Aufträge mit Bildern und Einzelschritt-Aufträge starten wie bisher komplett neu (Bilder werden nicht gespeichert).
+- **Belege (ausgeführt):** `vitest run`: 11 Dateien, 81 Tests bestanden (neu 5, alle Mock-Tests mit gemocktem Stream). `tsgo -b --noEmit`: 0 Fehler. `vite build`: Exit 0. `eslint` auf geänderten Dateien: nur Prettier-Formatfehler, die schon vorher bestanden (alte agent.ts: 75).
+- **Nicht getestet:** echter Abbruch mit Nemotron und Fortsetzung im Studio; Klick auf den neuen Knopf im Browser. Echte Provider-Tests: 0.
+- **Restrisiko:** Wurde Schritt N vor dem Abbruch teilweise angewendet (z. B. Reparatur scheiterte), läuft Schritt N bei Fortsetzung auf dem aktuellen Stand erneut.

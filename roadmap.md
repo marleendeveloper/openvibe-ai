@@ -56,3 +56,8 @@
 ## Phase 6 – Nur-ich-Zugang
 - [x] Passkey-Anmeldung hinzufügen und nur ein Konto (Besitzerin) zulassen; dort alle Features + verbundener API-Key
 - [x] Phase 5: Retries, Schrittplan, Bilder, Vorlagen, Startbildschirm, Chat-Design, Animationen
+
+## Qualitätsprogramm Phase A
+- [x] A.1 „Erneut versuchen“ setzt beim fehlgeschlagenen Plan-Schritt fort (Mock-Tests, nicht real im Studio geprüft)
+- [ ] A.3 Retry-Test mit Mock-Stream, der einmal abbricht
+- [ ] Echter Fortsetzungstest mit Nemotron (braucht Anmeldung als Marleen oder Justin)
