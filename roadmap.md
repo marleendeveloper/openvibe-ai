@@ -27,7 +27,8 @@
 
 # Complete account setup
 
-- [ ] Add email registration, login, confirmation state, password reset and existing social sign-in.
-- [ ] Add a private profile with display name and bio, automatic creation, and own-account access only.
-- [ ] Synchronize session state across studio, review and account controls; clear provider cookies on logout.
-- [ ] Test profile persistence, login/logout and review/OpenRouter flows where authentication is available.
+- [x] Add email registration, login, confirmation state, password reset and existing social sign-in.
+- [x] Add a private profile with display name and bio, automatic creation, and own-account access only.
+- [x] Synchronize session state across studio, review and account controls; clear provider cookies on logout.
+- [x] Test mobile/desktop registration controls, reserved-email rejection, reset view, profile validation and live schema/policies.
+- [ ] Test confirmed registration, profile persistence, login/logout and review/OpenRouter end-to-end. Blocker: no app users exist; a real email confirmation or social sign-in is required.

@@ -6,11 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useRuntime } from "./runtime";
 import { configureProvider } from "./provider-client";
 
-const AuthContext = createContext<{ user: User | null; loading: boolean; signOut: () => Promise<void> }>({ user: null, loading: true, signOut: async () => {} });
+const AuthContext = createContext<{ user: User | null; loading: boolean; recovery: boolean; signOut: () => Promise<void> }>({ user: null, loading: true, recovery: false, signOut: async () => {} });
 export const useAccount = () => useContext(AuthContext);
 export function AccountProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [recovery, setRecovery] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
   useEffect(() => {
@@ -19,6 +20,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (!active) return;
       setUser(session?.user ?? null); setLoading(false);
+      if (event === "PASSWORD_RECOVERY") setRecovery(true);
+      if (event === "SIGNED_OUT") setRecovery(false);
       if (["SIGNED_IN", "SIGNED_OUT", "USER_UPDATED"].includes(event)) {
         void router.invalidate();
         if (event !== "SIGNED_OUT") void queryClient.invalidateQueries();
@@ -35,5 +38,5 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
     await router.navigate({ to: "/", replace: true });
   }
-  return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user, loading, recovery, signOut }}>{children}</AuthContext.Provider>;
 }
