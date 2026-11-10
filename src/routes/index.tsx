@@ -7,9 +7,16 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "OpenVibe – Private AI Coding Studio" },
-      { name: "description", content: "Privates Vibe-Coding-Studio mit freier Modellwahl über Hugging Face und OpenRouter." },
+      {
+        name: "description",
+        content:
+          "Privates Vibe-Coding-Studio mit freier Modellwahl über Hugging Face und OpenRouter.",
+      },
       { property: "og:title", content: "OpenVibe – Private AI Coding Studio" },
-      { property: "og:description", content: "Websites und Apps per natürlicher Sprache bauen, mit Live-Preview." },
+      {
+        property: "og:description",
+        content: "Websites und Apps per natürlicher Sprache bauen, mit Live-Preview.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex, nofollow" },
@@ -18,7 +25,11 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const Loading = () => <div className="grid h-dvh place-items-center font-mono text-sm text-primary">openvibe://booting…</div>;
+const Loading = () => (
+  <div className="grid h-dvh place-items-center font-mono text-sm text-primary">
+    openvibe://booting…
+  </div>
+);
 
 function Index() {
   return (

@@ -6,7 +6,8 @@ import { isOwnerEmail } from "./owner";
 export const requireOwner = createMiddleware({ type: "function" })
   .middleware([requireSupabaseAuth])
   .server(({ next, context }) => {
-    if (!isOwnerEmail((context.claims as { email?: string }).email)) throw new Response("Forbidden", { status: 403 });
+    if (!isOwnerEmail((context.claims as { email?: string }).email))
+      throw new Response("Forbidden", { status: 403 });
     return next();
   });
 
@@ -18,7 +19,15 @@ export async function assertOwnerRequest(request: Request) {
   const key = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
   const client = createClient(process.env["SUPABASE_URL"]!, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { fetch: (input, init) => { const h = new Headers(init?.headers); if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization"); h.set("apikey", key); return fetch(input, { ...init, headers: h }); } },
+    global: {
+      fetch: (input, init) => {
+        const h = new Headers(init?.headers);
+        if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+          h.delete("Authorization");
+        h.set("apikey", key);
+        return fetch(input, { ...init, headers: h });
+      },
+    },
   });
   const { data, error } = await client.auth.getUser(token);
   if (error || !isOwnerEmail(data.user?.email)) throw new Error("owner");

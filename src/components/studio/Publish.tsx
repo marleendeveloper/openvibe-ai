@@ -18,11 +18,18 @@ export function Publish({ onClose }: { onClose: () => void }) {
     if (!project.cloudId) return;
     try {
       const pub = await getPublication({ data: { cloudId: project.cloudId } });
-      if (pub) { setPublished(pub); setSlug(pub.slug); }
-    } catch { /* keine bestehende Veröffentlichung */ }
+      if (pub) {
+        setPublished(pub);
+        setSlug(pub.slug);
+      }
+    } catch {
+      /* keine bestehende Veröffentlichung */
+    }
   }, [project.cloudId]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
 
   const publish = async () => {
     setBusy(true);
@@ -57,35 +64,75 @@ export function Publish({ onClose }: { onClose: () => void }) {
   const url = published ? `${window.location.origin}/p/${published.slug}` : null;
 
   return (
-    <div className="tab-in *:dialog-in fixed inset-0 z-50 grid place-items-center bg-background/80 p-4" role="dialog" aria-label="App veröffentlichen">
+    <div
+      className="tab-in *:dialog-in fixed inset-0 z-50 grid place-items-center bg-background/80 p-4"
+      role="dialog"
+      aria-label="App veröffentlichen"
+    >
       <div className="w-full max-w-md rounded-lg border bg-panel p-4 space-y-3 shadow-xl">
         <div className="flex items-center gap-2">
           <Globe size={17} className="text-primary" />
           <h2 className="flex-1 text-sm font-semibold">App veröffentlichen</h2>
-          <Btn onClick={onClose}><X size={16} /></Btn>
+          <Btn onClick={onClose}>
+            <X size={16} />
+          </Btn>
         </div>
         {!user ? (
-          <p className="text-sm text-muted-foreground">Bitte zuerst über das Profil-Symbol anmelden, um eine App zu veröffentlichen.</p>
+          <p className="text-sm text-muted-foreground">
+            Bitte zuerst über das Profil-Symbol anmelden, um eine App zu veröffentlichen.
+          </p>
         ) : (
           <>
-            <p className="text-xs text-muted-foreground">Die App erhält einen öffentlichen Link. Jeder mit dem Link kann sie ansehen. Der aktuelle Stand wird dafür im Konto gespeichert.</p>
+            <p className="text-xs text-muted-foreground">
+              Die App erhält einen öffentlichen Link. Jeder mit dem Link kann sie ansehen. Der
+              aktuelle Stand wird dafür im Konto gespeichert.
+            </p>
             <label className="block space-y-1">
               <span className="text-xs text-muted-foreground">Link-Name</span>
-              <input className="field w-full" placeholder="meine-app" value={slug} onChange={(e) => setSlug(e.target.value.toLowerCase())} disabled={busy || !!published} />
+              <input
+                className="field w-full"
+                placeholder="meine-app"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase())}
+                disabled={busy || !!published}
+              />
             </label>
             {url && (
               <p className="break-all rounded border bg-background p-2 font-mono text-xs">
-                <a className="text-primary underline" href={url} target="_blank" rel="noreferrer">{url}</a>
+                <a className="text-primary underline" href={url} target="_blank" rel="noreferrer">
+                  {url}
+                </a>
               </p>
             )}
             <div className="flex gap-2">
               {published ? (
                 <>
-                  <Btn variant="outline" className="flex-1" disabled={busy} onClick={() => void publish()}>Aktualisieren</Btn>
-                  <Btn variant="danger" className="flex-1" disabled={busy} onClick={() => void unpublish()}>Zurücknehmen</Btn>
+                  <Btn
+                    variant="outline"
+                    className="flex-1"
+                    disabled={busy}
+                    onClick={() => void publish()}
+                  >
+                    Aktualisieren
+                  </Btn>
+                  <Btn
+                    variant="danger"
+                    className="flex-1"
+                    disabled={busy}
+                    onClick={() => void unpublish()}
+                  >
+                    Zurücknehmen
+                  </Btn>
                 </>
               ) : (
-                <Btn variant="primary" className="flex-1" disabled={busy || slug.length < 3} onClick={() => void publish()}>Veröffentlichen</Btn>
+                <Btn
+                  variant="primary"
+                  className="flex-1"
+                  disabled={busy || slug.length < 3}
+                  onClick={() => void publish()}
+                >
+                  Veröffentlichen
+                </Btn>
               )}
             </div>
           </>

@@ -16,5 +16,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
-  plugins: [mcpPlugin({ path: "/api/public/mcp", metadataPath: "/api/public/.well-known/oauth-protected-resource" })],
+  plugins: [
+    mcpPlugin({
+      path: "/api/public/mcp",
+      metadataPath: "/api/public/.well-known/oauth-protected-resource",
+    }),
+  ],
 });

@@ -8,7 +8,12 @@ export function filesRevision(files: Record<string, string>) {
   return (hash >>> 0).toString(36);
 }
 
-export async function waitForPreview(projectId: string, revision: string, signal: AbortSignal, timeout = 45000) {
+export async function waitForPreview(
+  projectId: string,
+  revision: string,
+  signal: AbortSignal,
+  timeout = 45000,
+) {
   const start = Date.now();
   let stable = 0;
   while (Date.now() - start < timeout) {
@@ -26,7 +31,11 @@ export async function waitForPreview(projectId: string, revision: string, signal
   return { error: null, verified: false };
 }
 
-export function repairDecision(attempt: number, error: string, seen: Set<string>): "repair" | "repeat" | "limit" {
+export function repairDecision(
+  attempt: number,
+  error: string,
+  seen: Set<string>,
+): "repair" | "repeat" | "limit" {
   const fingerprint = error.trim().replace(/\s+/g, " ");
   if (seen.has(fingerprint)) return "repeat";
   if (attempt >= 5) return "limit";

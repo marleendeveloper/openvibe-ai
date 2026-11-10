@@ -6,7 +6,10 @@ export const useSavedOpenRouter = createServerFn({ method: "POST" })
   .handler(async () => {
     const { getRequest } = await import("@tanstack/react-start/server");
     const { saveCredential, GATEWAY_MARKER } = await import("./provider.server");
-    const key = process.env["UDC_OPENROUTER_API_KEY"] && process.env["LOVABLE_API_KEY"] ? GATEWAY_MARKER : process.env["OPENROUTER_API_KEY"];
+    const key =
+      process.env["UDC_OPENROUTER_API_KEY"] && process.env["LOVABLE_API_KEY"]
+        ? GATEWAY_MARKER
+        : process.env["OPENROUTER_API_KEY"];
     if (!key) throw new Error("Kein gespeicherter OpenRouter-Schlüssel verfügbar.");
     await saveCredential("openrouter", key, getRequest());
     return { configured: true };
@@ -21,7 +24,10 @@ export const autoConnectSavedOpenRouter = createServerFn({ method: "POST" })
     if (!AUTO_KEY_EMAILS.includes(email)) return { configured: false };
     const { getRequest } = await import("@tanstack/react-start/server");
     const { saveCredential, GATEWAY_MARKER } = await import("./provider.server");
-    const key = process.env["UDC_OPENROUTER_API_KEY"] && process.env["LOVABLE_API_KEY"] ? GATEWAY_MARKER : process.env["OPENROUTER_API_KEY"];
+    const key =
+      process.env["UDC_OPENROUTER_API_KEY"] && process.env["LOVABLE_API_KEY"]
+        ? GATEWAY_MARKER
+        : process.env["OPENROUTER_API_KEY"];
     if (!key) return { configured: false };
     await saveCredential("openrouter", key, getRequest());
     return { configured: true };

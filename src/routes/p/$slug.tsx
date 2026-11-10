@@ -34,7 +34,11 @@ function PublishedPage() {
   const customSetup = useMemo(() => {
     if (!app) return { dependencies: {} };
     try {
-      return { dependencies: JSON.parse((app.files as Record<string, string>)["/package.json"] ?? "{}").dependencies ?? {} };
+      return {
+        dependencies:
+          JSON.parse((app.files as Record<string, string>)["/package.json"] ?? "{}").dependencies ??
+          {},
+      };
     } catch {
       return { dependencies: {} };
     }
@@ -45,7 +49,9 @@ function PublishedPage() {
       <main className="grid min-h-dvh place-items-center bg-background text-foreground">
         <div className="text-center space-y-2">
           <h1 className="text-xl font-bold">App nicht gefunden</h1>
-          <p className="text-sm text-muted-foreground">Dieser Link ist ungültig oder die Veröffentlichung wurde zurückgenommen.</p>
+          <p className="text-sm text-muted-foreground">
+            Dieser Link ist ungültig oder die Veröffentlichung wurde zurückgenommen.
+          </p>
         </div>
       </main>
     );
@@ -54,12 +60,26 @@ function PublishedPage() {
   return (
     <div className="flex h-dvh flex-col bg-background">
       <header className="flex h-10 shrink-0 items-center gap-2 border-b bg-panel px-3">
-        <span className="font-mono text-xs font-bold"><span className="text-primary">▲</span> {app.title}</span>
-        <span className="ml-auto font-mono text-[11px] text-muted-foreground">mit OpenVibe erstellt</span>
+        <span className="font-mono text-xs font-bold">
+          <span className="text-primary">▲</span> {app.title}
+        </span>
+        <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+          mit OpenVibe erstellt
+        </span>
       </header>
       <div className="min-h-0 flex-1">
-        <SandpackProvider template="react-ts" files={files} customSetup={customSetup} theme="dark" options={{ initMode: "immediate", recompileMode: "delayed", recompileDelay: 400 }}>
-          <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: "100%" }} />
+        <SandpackProvider
+          template="react-ts"
+          files={files}
+          customSetup={customSetup}
+          theme="dark"
+          options={{ initMode: "immediate", recompileMode: "delayed", recompileDelay: 400 }}
+        >
+          <SandpackPreview
+            showOpenInCodeSandbox={false}
+            showRefreshButton={false}
+            style={{ height: "100%" }}
+          />
         </SandpackProvider>
       </div>
     </div>

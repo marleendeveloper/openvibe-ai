@@ -11,8 +11,18 @@ export const useRuntime = create<{
   phase: "plan" | "write" | "check" | "done" | null;
   setPhase: (p: "plan" | "write" | "check" | "done" | null) => void;
   connected: Partial<Record<ProviderId, boolean>>;
-  preview: { projectId: string; revision: string; status: "loading" | "ready" | "error"; error: string | null } | null;
-  setPreview: (value: { projectId: string; revision: string; status: "loading" | "ready" | "error"; error: string | null }) => void;
+  preview: {
+    projectId: string;
+    revision: string;
+    status: "loading" | "ready" | "error";
+    error: string | null;
+  } | null;
+  setPreview: (value: {
+    projectId: string;
+    revision: string;
+    status: "loading" | "ready" | "error";
+    error: string | null;
+  }) => void;
   setConnected: (p: ProviderId, value: boolean) => void;
   step: (text: string) => void;
   resetProgress: () => void;

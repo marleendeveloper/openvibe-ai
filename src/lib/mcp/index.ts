@@ -9,7 +9,8 @@ export default defineMcp({
   name: "pixel-perfect-replay",
   title: "Pixel Perfect Replay",
   version: "0.1.0",
-  instructions: "Read-only access to the OpenVibe studio owner's saved projects, their files and published apps.",
+  instructions:
+    "Read-only access to the OpenVibe studio owner's saved projects, their files and published apps.",
   auth: auth.oauth.issuer({
     issuer: `https://${projectRef}.supabase.co/auth/v1`,
     acceptedAudiences: "authenticated",

@@ -17,12 +17,26 @@ export function CodeEditor() {
     return [javascript({ jsx: true, typescript: /\.tsx?$/.test(activeFile) })];
   }, [activeFile]);
 
-  if (value === undefined) return <div className="grid h-full place-items-center text-sm text-muted-foreground">Keine Datei geöffnet</div>;
+  if (value === undefined)
+    return (
+      <div className="grid h-full place-items-center text-sm text-muted-foreground">
+        Keine Datei geöffnet
+      </div>
+    );
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-3 py-2 font-mono text-xs text-muted-foreground">{activeFile}</div>
       <div className="min-h-0 flex-1 overflow-hidden">
-        <CodeMirror key={project.id + activeFile} value={value} height="100%" theme={oneDark} extensions={ext} onChange={(v) => writeFile(activeFile, v)} basicSetup={{ foldGutter: true }} className="h-full" />
+        <CodeMirror
+          key={project.id + activeFile}
+          value={value}
+          height="100%"
+          theme={oneDark}
+          extensions={ext}
+          onChange={(v) => writeFile(activeFile, v)}
+          basicSetup={{ foldGutter: true }}
+          className="h-full"
+        />
       </div>
     </div>
   );

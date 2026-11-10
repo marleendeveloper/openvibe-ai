@@ -1,23 +1,49 @@
 export type ProviderId = "huggingface" | "openrouter" | "custom";
 
 export const PROVIDERS: Record<ProviderId, { name: string; baseUrl: string; keyHint: string }> = {
-  huggingface: { name: "Hugging Face", baseUrl: "https://router.huggingface.co/v1", keyHint: "hf_…" },
+  huggingface: {
+    name: "Hugging Face",
+    baseUrl: "https://router.huggingface.co/v1",
+    keyHint: "hf_…",
+  },
   openrouter: { name: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1", keyHint: "sk-or-…" },
   custom: { name: "OpenAI-kompatibel", baseUrl: "", keyHint: "API-Key" },
 };
 
-export type ModelInfo = { id: string; name: string; free: boolean; context?: number; vision?: boolean };
-export type ProviderStatus = { configured: boolean; baseUrl: string; models: ModelInfo[]; recommendedModel?: string; error?: string };
+export type ModelInfo = {
+  id: string;
+  name: string;
+  free: boolean;
+  context?: number;
+  vision?: boolean;
+};
+export type ProviderStatus = {
+  configured: boolean;
+  baseUrl: string;
+  models: ModelInfo[];
+  recommendedModel?: string;
+  error?: string;
+};
 
 // Ordered preference, not a benchmark ranking. Only live zero-priced entries qualify.
 export function recommendedFreeModel(models: ModelInfo[]): string | undefined {
-  const candidates = ["nvidia/nemotron-3-ultra-550b-a55b:free", "cohere/north-mini-code:free", "openrouter/free"];
+  const candidates = [
+    "nvidia/nemotron-3-ultra-550b-a55b:free",
+    "cohere/north-mini-code:free",
+    "openrouter/free",
+  ];
   return candidates.find((id) => models.some((model) => model.id === id && model.free));
 }
 
 export function hasZeroPricing(pricing: Record<string, unknown> | undefined): boolean {
-  if (!pricing || pricing["prompt"] === undefined || pricing["completion"] === undefined) return false;
-  return Object.values(pricing).every((value) => (typeof value === "string" || typeof value === "number") && Number.isFinite(Number(value)) && Number(value) === 0);
+  if (!pricing || pricing["prompt"] === undefined || pricing["completion"] === undefined)
+    return false;
+  return Object.values(pricing).every(
+    (value) =>
+      (typeof value === "string" || typeof value === "number") &&
+      Number.isFinite(Number(value)) &&
+      Number(value) === 0,
+  );
 }
 
 export function providerError(status: number, detail: string, retryAfter?: string | null): string {
