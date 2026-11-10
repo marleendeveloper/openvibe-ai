@@ -62,7 +62,11 @@
 - [x] A.2 Berichte/Plan auf belegten Stand gebracht; PHASE2/3 als historisch markiert
 - [x] A.3 Retry-Test mit abbrechendem Mock-Stream; Teilantworten nicht mehr als Kontext (nur Mock, 85 Tests)
 - [ ] Echter Retry-/Fortsetzungstest mit Nemotron im Studio. Blocker: Freigabe zur Anmeldung als Marleen oder Justin
-- [ ] Prettier-Altlasten beheben und vollständigen Lint-Lauf abschließen
+- [x] Prettier in agent.ts, store.ts, Chat.tsx behoben (0 Meldungen; 85 Tests, TS 0, Build 0)
+- [x] Vollständiger Lint-Lauf abgeschlossen (ohne `.oj-cache`): 1084 vorbestehende Fehler, 11 Warnungen in anderen Dateien
+- [ ] `.oj-cache` in die Lint-Ignores aufnehmen (Konfig-Änderung, braucht Freigabe)
+- [ ] Restliche Prettier-Fehler in handgeschriebenen Dateien formatieren; automatisch erzeugte Dateien ausnehmen (braucht Freigabe)
+- [ ] Echte Lint-Fehler prüfen: rules-of-hooks in passkey.functions.ts, no-control-regex in limits.ts und oauth-return-path.ts
 
 ## Phase B/C (offen)
 - [ ] Passkey auf echtem Gerät, E-Mail-Notfalllink, MCP mit echtem Client (Nutzeraktionen nötig)

@@ -19,7 +19,13 @@ export type Message = {
   resume?: ResumePoint;
 };
 /** Plan, fehlgeschlagener Schritt und Dateistand beim Abbruch; Fortsetzung nur bei identischem Projekt und Stand. */
-export type ResumePoint = { prompt: string; steps: string[]; failedStep: number; projectId: string; revision: string };
+export type ResumePoint = {
+  prompt: string;
+  steps: string[];
+  failedStep: number;
+  projectId: string;
+  revision: string;
+};
 export type Snapshot = { id: string; at: number; label: string; files: Files };
 export type Project = {
   id: string;
@@ -120,7 +126,12 @@ type State = {
   clearChat: () => void;
   setCloudId: (id: string, cloudId: string | undefined) => void;
   /** Cloud-Projekt lokal anlegen oder aktualisieren; wählt es aus. */
-  importCloudProject: (p: { cloudId: string; name: string; files: Files; messages: Message[] }) => void;
+  importCloudProject: (p: {
+    cloudId: string;
+    name: string;
+    files: Files;
+    messages: Message[];
+  }) => void;
 };
 
 const uid = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -142,7 +153,9 @@ export const useStudio = create<State>()(
     (set, get) => {
       const patchCurrent = (fn: (p: Project) => Project, projectId = get().currentId) =>
         set((s) => ({
-          projects: s.projects.map((p) => (p.id === projectId ? { ...fn(p), updatedAt: Date.now() } : p)),
+          projects: s.projects.map((p) =>
+            p.id === projectId ? { ...fn(p), updatedAt: Date.now() } : p,
+          ),
         }));
       return {
         settings: {
@@ -166,40 +179,73 @@ export const useStudio = create<State>()(
         setSettings: (s) => set((st) => ({ settings: { ...st.settings, ...s } })),
         createProject: (name, files) => {
           const p = newProject(name, files);
-          set((s) => ({ projects: [p, ...s.projects], currentId: p.id, activeFile: Object.keys(p.files)[0] ?? "/App.tsx", settings: { ...s.settings, shareProject: false } }));
+          set((s) => ({
+            projects: [p, ...s.projects],
+            currentId: p.id,
+            activeFile: Object.keys(p.files)[0] ?? "/App.tsx",
+            settings: { ...s.settings, shareProject: false },
+          }));
         },
         deleteProject: (id) =>
           set((s) => {
             let projects = s.projects.filter((p) => p.id !== id);
             if (!projects.length) projects = [newProject("Neues Projekt")];
-            return { projects, currentId: s.currentId === id ? (projects[0]?.id ?? s.currentId) : s.currentId };
+            return {
+              projects,
+              currentId: s.currentId === id ? (projects[0]?.id ?? s.currentId) : s.currentId,
+            };
           }),
-        renameProject: (id, name) => set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, name } : p)) })),
+        renameProject: (id, name) =>
+          set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, name } : p)) })),
         selectProject: (id) => {
           const p = get().projects.find((x) => x.id === id);
           if (!p) return;
-          set({ currentId: id, activeFile: p.files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(p.files)[0] ?? "", settings: { ...get().settings, shareProject: false } });
+          set({
+            currentId: id,
+            activeFile:
+              p.files["/App.tsx"] !== undefined ? "/App.tsx" : (Object.keys(p.files)[0] ?? ""),
+            settings: { ...get().settings, shareProject: false },
+          });
         },
         setActiveFile: (activeFile) => set({ activeFile }),
-        writeFile: (path, content) => patchCurrent((p) => ({ ...p, files: validateFiles({ ...p.files, [safePath(path)]: content }) })),
+        writeFile: (path, content) =>
+          patchCurrent((p) => ({
+            ...p,
+            files: validateFiles({ ...p.files, [safePath(path)]: content }),
+          })),
         deleteFile: (path) =>
           patchCurrent((p) => {
             safePath(path);
-            const snap: Snapshot = { id: uid(), at: Date.now(), label: `Löschen: ${path}`, files: { ...p.files } };
+            const snap: Snapshot = {
+              id: uid(),
+              at: Date.now(),
+              label: `Löschen: ${path}`,
+              files: { ...p.files },
+            };
             const files = { ...p.files };
             delete files[path];
             return { ...p, files, history: [snap, ...p.history].slice(0, 30) };
           }),
         renameFile: (from, to) => {
-          safePath(from); safePath(to);
+          safePath(from);
+          safePath(to);
           patchCurrent((p) => {
             if (p.files[from] === undefined) return p;
             if (p.files[to] !== undefined) throw new Error("Zieldatei existiert bereits.");
-            const snap: Snapshot = { id: uid(), at: Date.now(), label: `Umbenennen: ${from}`, files: { ...p.files } };
+            const snap: Snapshot = {
+              id: uid(),
+              at: Date.now(),
+              label: `Umbenennen: ${from}`,
+              files: { ...p.files },
+            };
             const files = { ...p.files };
             files[to] = files[from] ?? "";
             delete files[from];
-            return { ...p, files: validateFiles(files), history: [snap, ...p.history].slice(0, 30) };
+            return {
+              ...p,
+              files: validateFiles(files),
+              history: [snap, ...p.history].slice(0, 30),
+            };
           });
           if (get().activeFile === from) set({ activeFile: to });
         },
@@ -212,25 +258,45 @@ export const useStudio = create<State>()(
               if (op.type === "write") files[op.path] = op.content;
               else delete files[op.path];
             }
-            return { ...p, files: validateFiles(files), history: [snap, ...p.history].slice(0, 30) };
+            return {
+              ...p,
+              files: validateFiles(files),
+              history: [snap, ...p.history].slice(0, 30),
+            };
           }, projectId);
           const w = ops.find((o) => o.type === "write");
           if (w && get().currentId === projectId) set({ activeFile: w.path });
         },
-        undo: () => { const p = get().projects.find((p) => p.id === get().currentId); const snap = p?.history[0]; if (snap) get().restore(snap.id); },
+        undo: () => {
+          const p = get().projects.find((p) => p.id === get().currentId);
+          const snap = p?.history[0];
+          if (snap) get().restore(snap.id);
+        },
         restore: (snapId) =>
           patchCurrent((p) => {
             const snap = p.history.find((h) => h.id === snapId);
             if (!snap) return p;
-            const cur: Snapshot = { id: uid(), at: Date.now(), label: "Vor Wiederherstellung", files: p.files };
+            const cur: Snapshot = {
+              id: uid(),
+              at: Date.now(),
+              label: "Vor Wiederherstellung",
+              files: p.files,
+            };
             const files = validateFiles(snap.files);
             const active = get().activeFile;
             if (files[active] === undefined) set({ activeFile: Object.keys(files)[0] ?? "" });
             return { ...p, files, history: [cur, ...p.history].slice(0, 30) };
           }),
-        addMessage: (m, projectId) => patchCurrent((p) => ({ ...p, messages: [...p.messages, m] }), projectId),
+        addMessage: (m, projectId) =>
+          patchCurrent((p) => ({ ...p, messages: [...p.messages, m] }), projectId),
         updateMessage: (id, patch, projectId) =>
-          patchCurrent((p) => ({ ...p, messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)) }), projectId),
+          patchCurrent(
+            (p) => ({
+              ...p,
+              messages: p.messages.map((m) => (m.id === id ? { ...m, ...patch } : m)),
+            }),
+            projectId,
+          ),
         clearChat: () => patchCurrent((p) => ({ ...p, messages: [] })),
         setCloudId: (id, cloudId) =>
           set((s) => ({
@@ -247,16 +313,37 @@ export const useStudio = create<State>()(
           set((s) => {
             const existing = s.projects.find((x) => x.cloudId === p.cloudId);
             if (existing) {
-              return { projects: s.projects.map((x) => (x.cloudId === p.cloudId ? { ...x, name: p.name, files, messages: p.messages } : x)), currentId: existing.id, activeFile: files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(files)[0] ?? "" };
+              return {
+                projects: s.projects.map((x) =>
+                  x.cloudId === p.cloudId ? { ...x, name: p.name, files, messages: p.messages } : x,
+                ),
+                currentId: existing.id,
+                activeFile:
+                  files["/App.tsx"] !== undefined ? "/App.tsx" : (Object.keys(files)[0] ?? ""),
+              };
             }
-            const np: Project = { id: uid(), name: p.name, files, messages: p.messages, history: [], updatedAt: Date.now(), cloudId: p.cloudId };
-            return { projects: [np, ...s.projects], currentId: np.id, activeFile: files["/App.tsx"] !== undefined ? "/App.tsx" : Object.keys(files)[0] ?? "" };
+            const np: Project = {
+              id: uid(),
+              name: p.name,
+              files,
+              messages: p.messages,
+              history: [],
+              updatedAt: Date.now(),
+              cloudId: p.cloudId,
+            };
+            return {
+              projects: [np, ...s.projects],
+              currentId: np.id,
+              activeFile:
+                files["/App.tsx"] !== undefined ? "/App.tsx" : (Object.keys(files)[0] ?? ""),
+            };
           });
         },
       };
     },
     {
-      name: "openvibe-studio", version: 2,
+      name: "openvibe-studio",
+      version: 2,
       migrate: (persisted) => {
         const old = persisted as { settings?: Record<string, unknown> };
         if (old.settings) {
@@ -268,12 +355,27 @@ export const useStudio = create<State>()(
       merge: (persisted, current) => {
         const data = persisted as Partial<State> | undefined;
         const projects = data?.projects?.map((p) => {
-          try { return { ...p, files: validateFiles(p.files), history: p.history ?? [], messages: p.messages ?? [] }; } catch { return newProject(p.name); }
+          try {
+            return {
+              ...p,
+              files: validateFiles(p.files),
+              history: p.history ?? [],
+              messages: p.messages ?? [],
+            };
+          } catch {
+            return newProject(p.name);
+          }
         });
-        return { ...current, ...data, projects: projects?.length ? projects : current.projects, settings: { ...current.settings, ...data?.settings } };
+        return {
+          ...current,
+          ...data,
+          projects: projects?.length ? projects : current.projects,
+          settings: { ...current.settings, ...data?.settings },
+        };
       },
     },
   ),
 );
 
-export const useProject = () => useStudio((s) => s.projects.find((p) => p.id === s.currentId) ?? s.projects[0] ?? first);
+export const useProject = () =>
+  useStudio((s) => s.projects.find((p) => p.id === s.currentId) ?? s.projects[0] ?? first);
