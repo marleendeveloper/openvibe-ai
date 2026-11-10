@@ -157,7 +157,7 @@ export const useStudio = create<State>()(
           set((s) => {
             let projects = s.projects.filter((p) => p.id !== id);
             if (!projects.length) projects = [newProject("Neues Projekt")];
-            return { projects, currentId: s.currentId === id ? projects[0].id : s.currentId };
+            return { projects, currentId: s.currentId === id ? projects[0]!.id : s.currentId };
           }),
         renameProject: (id, name) => set((s) => ({ projects: s.projects.map((p) => (p.id === id ? { ...p, name } : p)) })),
         selectProject: (id) => {
@@ -175,7 +175,7 @@ export const useStudio = create<State>()(
         renameFile: (from, to) => {
           patchCurrent((p) => {
             const files = { ...p.files };
-            files[to] = files[from];
+            files[to] = files[from] ?? "";
             delete files[from];
             return { ...p, files };
           });
@@ -211,4 +211,4 @@ export const useStudio = create<State>()(
   ),
 );
 
-export const useProject = () => useStudio((s) => s.projects.find((p) => p.id === s.currentId) ?? s.projects[0]);
+export const useProject = () => useStudio((s) => (s.projects.find((p) => p.id === s.currentId) ?? s.projects[0])!);
