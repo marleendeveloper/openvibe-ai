@@ -91,3 +91,4 @@
 .cm-editor { height: 100%; font-size: 13px; }
 .sp-preview, .sp-preview-container { height: 100% !important; display: flex; flex-direction: column; }
 .sp-preview-iframe { flex: 1; height: 100% !important; min-height: 0; }
+.openvibe-preview-ready .sp-loading { display: none !important; }

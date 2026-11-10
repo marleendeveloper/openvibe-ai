@@ -47,6 +47,8 @@ export function Preview() {
   const logs = useRuntime((s) => s.logs);
   const busy = useRuntime((s) => s.busy);
   const revision = useMemo(() => filesRevision(project.files), [project.files]);
+  const previewState = useRuntime((s) => s.preview);
+  const previewReady = previewState?.projectId === project.id && previewState.revision === revision && previewState.status === "ready";
 
   const customSetup = useMemo(() => {
     let dependencies: Record<string, string> = {};
@@ -80,7 +82,7 @@ export function Preview() {
           </div>
         )}
         <div className={cn("min-h-0 flex-1", tab !== "preview" && "hidden")}>
-          <div className={cn("mx-auto h-full", device === "mobile" && "max-w-[390px] border-x")}>
+          <div className={cn("mx-auto h-full", previewReady && "openvibe-preview-ready", device === "mobile" && "max-w-[390px] border-x")}>
             <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: "100%" }} />
           </div>
         </div>
