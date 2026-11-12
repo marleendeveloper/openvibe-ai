@@ -148,8 +148,8 @@ button{border:0;border-radius:12px;padding:10px 14px;width:100%;background:#7c3a
 ];
 
 export const EXAMPLE_PROMPTS = [
+  "Live-Demo: Baue eine Wetter-Karte für Berlin mit 21 °C und einem Button „Einheit wechseln“ zwischen °C und °F.",
   "Baue eine Landingpage für ein Café mit Speisekarte und Öffnungszeiten.",
   "Mach einen Taschenrechner mit großen Tasten.",
   "Erstelle ein Quiz mit 5 Fragen und Punktestand.",
-  "Baue eine Wetter-Karte mit °C/°F-Umschalter.",
 ];

@@ -375,6 +375,12 @@ export function Chat() {
                 </button>
               ))}
             </div>
+            <button
+              onClick={() => TEMPLATES.forEach((t) => createProject(`Demo: ${t.name}`, t.files))}
+              className="lift w-full rounded-xl brand-gradient px-3 py-2.5 text-sm font-bold text-primary-foreground"
+            >
+              Demo-Paket laden (alle 5 Vorzeige-Apps)
+            </button>
             <div className="space-y-1.5">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Beispiel-Aufträge
