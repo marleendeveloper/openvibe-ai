@@ -25,6 +25,7 @@ export default defineConfig({
       transform(code: string, id: string) {
         if (/[\\/]tsyringe[\\/].*\.js$/.test(id) && !code.includes("reflect-metadata"))
           return { code: `import "reflect-metadata";\n${code}`, map: null };
+        return null;
       },
     },
     mcpPlugin({
