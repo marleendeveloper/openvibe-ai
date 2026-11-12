@@ -17,6 +17,16 @@ export default defineConfig({
     server: { entry: "server" },
   },
   plugins: [
+    // tsyringe (used by passkey crypto) needs the Reflect polyfill loaded first; shared chunks can
+    // evaluate it before any app import, which crashed the live server on every page.
+    {
+      name: "tsyringe-reflect-polyfill",
+      enforce: "pre",
+      transform(code: string, id: string) {
+        if (/[\\/]tsyringe[\\/].*\.js$/.test(id) && !code.includes("reflect-metadata"))
+          return { code: `import "reflect-metadata";\n${code}`, map: null };
+      },
+    },
     mcpPlugin({
       path: "/api/public/mcp",
       metadataPath: "/api/public/.well-known/oauth-protected-resource",

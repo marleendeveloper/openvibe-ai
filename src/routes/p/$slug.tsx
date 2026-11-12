@@ -1,6 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { SandpackProvider, SandpackPreview } from "@codesandbox/sandpack-react";
-import { useMemo } from "react";
+import { ClientOnly, createFileRoute } from "@tanstack/react-router";
+import { lazy, Suspense, useMemo } from "react";
+
+const PublishedSandpack = lazy(() => import("@/components/studio/PublishedSandpack"));
 import { loadPublishedApp } from "@/lib/studio/cloud.functions";
 
 export const Route = createFileRoute("/p/$slug")({
@@ -68,19 +69,11 @@ function PublishedPage() {
         </span>
       </header>
       <div className="min-h-0 flex-1">
-        <SandpackProvider
-          template="react-ts"
-          files={files}
-          customSetup={customSetup}
-          theme="dark"
-          options={{ initMode: "immediate", recompileMode: "delayed", recompileDelay: 400 }}
-        >
-          <SandpackPreview
-            showOpenInCodeSandbox={false}
-            showRefreshButton={false}
-            style={{ height: "100%" }}
-          />
-        </SandpackProvider>
+        <ClientOnly>
+          <Suspense fallback={null}>
+            <PublishedSandpack files={files} customSetup={customSetup} />
+          </Suspense>
+        </ClientOnly>
       </div>
     </div>
   );
