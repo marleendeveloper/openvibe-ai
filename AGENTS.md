@@ -42,3 +42,4 @@ use the editor.
 - The studio is single-owner: every server function uses `requireOwner`, the AI/provider routes call `assertOwnerRequest`, and signups are disabled, so no other account can use features or the linked key.
 - Passkeys use SimpleWebAuthn in server functions with challenges in an encrypted short-lived session; a verified owner passkey is exchanged for a one-time magic-link token hash, because Cloud auth has no native passkey sign-in.
 - MCP server lives in `src/lib/mcp/` (OAuth via managed auth issuer, owner-email check in `supabaseForUser`, read-only tools) and is mounted under `/api/public/mcp` because the app is published privately.
+- AI relay uses an idle timeout (not a total cap) and the agent falls back to other free models on overload, because slow free reasoning models stream for minutes and get overloaded.

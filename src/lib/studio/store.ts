@@ -41,10 +41,10 @@ export type Project = {
 export const DEFAULT_FILES: Files = {
   "/App.tsx": `export default function App() {
   return (
-    <main className="min-h-screen grid place-items-center bg-zinc-950 text-zinc-100">
-      <div className="text-center space-y-3">
-        <h1 className="text-4xl font-bold">Hallo OpenVibe ✦</h1>
-        <p className="text-zinc-400">Beschreibe im Chat, was gebaut werden soll.</p>
+    <main className="start">
+      <div>
+        <h1>Hallo OpenVibe ✦</h1>
+        <p>Beschreibe im Chat, was gebaut werden soll.</p>
       </div>
     </main>
   );
@@ -58,7 +58,10 @@ import App from "./App";
 const root = document.getElementById("root");
 if (root) createRoot(root).render(<App />);
 `,
-  "/styles.css": `body { margin: 0; font-family: system-ui, sans-serif; }
+  "/styles.css": `body { margin: 0; font-family: system-ui, sans-serif; background: #09070f; color: #f4f1fb; }
+.start { min-height: 100vh; display: grid; place-items: center; text-align: center; }
+.start h1 { font-size: 2.25rem; margin: 0 0 .75rem; }
+.start p { color: #a79fbd; margin: 0; }
 `,
   "/public/index.html": `<!DOCTYPE html>
 <html lang="de">

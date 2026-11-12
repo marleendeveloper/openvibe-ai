@@ -73,4 +73,4 @@
 - [ ] Passkey auf echtem Gerät, E-Mail-Notfalllink, MCP mit echtem Client (Nutzeraktionen nötig)
 - [ ] Browserprüfung: 4 weitere Vorlagen, Bild-Auftrag mit Vorschau, Desktop 1280 px, Reduced Motion
 - [ ] CI; GitHub-Sicherung vorerst zurückgestellt
-- [ ] Demos live per KI erstellbar (z. B. Merch-Shop sieht wie echter Shop aus); Anbieter-Überlastung (503) abfangen
+- [x] Demos live per KI erstellbar (z. B. Merch-Shop sieht wie echter Shop aus); Anbieter-Überlastung (503) abfangen
