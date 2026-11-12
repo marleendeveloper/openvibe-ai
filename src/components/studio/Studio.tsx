@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import {
   Folder,
   MessageSquare,
@@ -14,8 +14,19 @@ import {
 import { useStudio } from "@/lib/studio/store";
 import { FileTree } from "./FileTree";
 import { Chat } from "./Chat";
-import { CodeEditor } from "./CodeEditor";
-import { Preview } from "./Preview";
+const LazyCodeEditor = lazy(() => import("./CodeEditor").then((m) => ({ default: m.CodeEditor })));
+const LazyPreview = lazy(() => import("./Preview").then((m) => ({ default: m.Preview })));
+const Loading = () => <div className="skeleton h-full w-full" />;
+const CodeEditor = () => (
+  <Suspense fallback={<Loading />}>
+    <LazyCodeEditor />
+  </Suspense>
+);
+const Preview = () => (
+  <Suspense fallback={<Loading />}>
+    <LazyPreview />
+  </Suspense>
+);
 import { Settings } from "./Settings";
 import { Btn } from "./ui";
 import { cn } from "@/lib/utils";
