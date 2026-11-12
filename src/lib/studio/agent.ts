@@ -1,5 +1,5 @@
 import { streamChat, type ChatMsg, type ContentPart } from "./ai";
-import { isRetryableError, RETRY, needsPlan, parsePlan } from "./phase5";
+import { isRetryableError, isOverloadError, overloadFallbacks, RETRY, needsPlan, parsePlan } from "./phase5";
 import { parseFileOps } from "./parse";
 import { useStudio, uid, type ResumePoint } from "./store";
 import { useRuntime } from "./runtime";
@@ -33,12 +33,25 @@ const sleep = (ms: number, signal: AbortSignal) =>
 async function streamWithRetry(
   opts: Parameters<typeof streamChat>[0],
   onRetry: (n: number) => void,
+  onFallback?: (model: string) => void,
 ): Promise<string> {
   for (let n = 0; ; n++) {
     try {
       return await streamChat(opts);
     } catch (e) {
-      if (n >= RETRY.attempts || !isRetryableError(e) || opts.signal?.aborted) throw e;
+      if (opts.signal?.aborted) throw e;
+      if (n >= RETRY.attempts || !isRetryableError(e)) {
+        if (!isOverloadError(e)) throw e;
+        for (const model of overloadFallbacks(opts.model, opts.zeroCostOnly ?? false)) {
+          onFallback?.(model);
+          try {
+            return await streamChat({ ...opts, model });
+          } catch (e2) {
+            if (opts.signal?.aborted || !isOverloadError(e2)) throw e2;
+          }
+        }
+        throw e;
+      }
       onRetry(n + 1);
       await sleep(RETRY.delays[n] ?? 3000, opts.signal!);
     }
@@ -143,6 +156,10 @@ export async function runAgent(
         (n) => {
           reset();
           rt.step(`Verbindung abgebrochen · Neuer Versuch ${n}/${RETRY.attempts}`);
+        },
+        (model) => {
+          reset();
+          rt.step(`Modell überlastet · weiter mit kostenlosem ${model}`);
         },
       );
     let steps = resume ? resume.steps : [prompt];

@@ -20,6 +20,15 @@ export const Route = createFileRoute("/api/public/ai")({
             data.zeroCostOnly,
             p.hasImages(data.messages),
           );
+          // Idle timeout instead of a total cap: slow reasoning models stream for minutes,
+          // and a fixed 120 s limit cut long code answers off mid-stream.
+          const idle = new AbortController();
+          let idleTimer: ReturnType<typeof setTimeout> | undefined;
+          const touch = () => {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => idle.abort(new Error("Anbieter antwortet nicht mehr.")), 90000);
+          };
+          touch();
           const upstream = await p.providerFetch(data.provider, key, "/chat/completions", {
             method: "POST",
             headers: { "content-type": "application/json" },
@@ -34,19 +43,26 @@ export const Route = createFileRoute("/api/public/ai")({
                   }
                 : {},
             ),
-            signal: AbortSignal.any([request.signal, AbortSignal.timeout(120000)]),
+            signal: AbortSignal.any([request.signal, idle.signal, AbortSignal.timeout(600000)]),
           });
-          if (!upstream.ok) return upstream;
+          if (!upstream.ok) {
+            clearTimeout(idleTimer);
+            return upstream;
+          }
           const { LIMITS } = await import("@/lib/studio/limits");
           let size = 0;
           const bounded = new TransformStream<Uint8Array, Uint8Array>({
             transform(chunk, stream) {
+              touch();
               size += chunk.length;
               if (size > LIMITS.responseBytes) {
                 stream.error(new Error("Antwort zu groß."));
                 return;
               }
               stream.enqueue(chunk);
+            },
+            flush() {
+              clearTimeout(idleTimer);
             },
           });
           return new Response(upstream.body?.pipeThrough(bounded), {

@@ -21,6 +21,23 @@ export function isRetryableError(error: unknown): boolean {
   );
 }
 
+/** Free models tried in order when the chosen free model is overloaded (HTTP 503/429). */
+export const OVERLOAD_FALLBACKS = [
+  "nvidia/nemotron-3.5-super-vl:free",
+  "google/gemma-4-31b-it:free",
+] as const;
+
+export function isOverloadError(error: unknown): boolean {
+  const msg = error instanceof Error ? error.message : String(error);
+  return /\b(503|429)\b|overload|überlast|nicht erreichbar/i.test(msg);
+}
+
+/** Fallbacks are only offered while the 0€ guard is on, so the server re-verifies live free pricing. */
+export function overloadFallbacks(model: string, zeroCostOnly: boolean): string[] {
+  if (!zeroCostOnly || !model.endsWith(":free")) return [];
+  return OVERLOAD_FALLBACKS.filter((m) => m !== model);
+}
+
 export function validateImageFile(
   file: { type: string; size: number },
   existing: number,
@@ -54,8 +71,10 @@ export function freeVisionModel(models: ModelInfo[]): string | undefined {
 }
 
 /** Large tasks are planned into steps first. */
+/** Live-demo prompts describe one small app and are built in a single step for speed. */
 export const needsPlan = (prompt: string) =>
-  prompt.trim().length > 280 || (prompt.match(/[,.;\n]/g)?.length ?? 0) >= 6;
+  !/^\s*Live-Demo:/i.test(prompt) &&
+  (prompt.trim().length > 280 || (prompt.match(/[,.;\n]/g)?.length ?? 0) >= 6);
 
 export function parsePlan(text: string): string[] {
   const clean = text.replace(/<think>[\s\S]*?(<\/think>|$)/g, "");

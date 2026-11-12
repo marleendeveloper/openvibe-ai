@@ -148,8 +148,9 @@ button{border:0;border-radius:12px;padding:10px 14px;width:100%;background:#7c3a
 ];
 
 export const EXAMPLE_PROMPTS = [
+  "Live-Demo: Baue einen Merch-Shop „Rave Merch“ im dunklen Lila-Design: Kopfzeile mit Warenkorb-Zähler und Summe in €, 4 Produktkarten (T-Shirt 25 €, Cap 18 €, Tasche 32 €, Sticker 4 €) mit großem Emoji, Preis und Button „In den Warenkorb“.",
+  "Live-Demo: Baue eine Landingpage „RaveSafe – Sicher feiern“: dunkler Hintergrund mit lila Leuchten, große Überschrift, Button „Jetzt informieren“ und 3 Karten (Safer Use, Notfall-Hilfe, Community).",
+  "Live-Demo: Baue ein Dashboard „Übersicht“ mit 3 Kennzahl-Karten (Besucher 12.480, Umsatz 3.920 €, Anmeldungen 342) und einem lila Balkendiagramm aus 7 Balken.",
+  "Live-Demo: Baue eine Todo-App „Meine Aufgaben“ mit Eingabefeld, Button „Hinzufügen“, Abhaken und Löschen – dunkles, modernes Design.",
   "Live-Demo: Baue eine Wetter-Karte für Berlin mit 21 °C und einem Button „Einheit wechseln“ zwischen °C und °F.",
-  "Baue eine Landingpage für ein Café mit Speisekarte und Öffnungszeiten.",
-  "Mach einen Taschenrechner mit großen Tasten.",
-  "Erstelle ein Quiz mit 5 Fragen und Punktestand.",
 ];
