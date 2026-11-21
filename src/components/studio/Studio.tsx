@@ -10,8 +10,16 @@ import {
   UserRound,
   Globe,
   LayoutGrid,
+  MoreHorizontal,
 } from "lucide-react";
-import { useStudio } from "@/lib/studio/store";
+import { useStudio, useProject } from "@/lib/studio/store";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { FileTree } from "./FileTree";
 import { Chat } from "./Chat";
 const LazyCodeEditor = lazy(() => import("./CodeEditor").then((m) => ({ default: m.CodeEditor })));
@@ -53,6 +61,8 @@ export default function Studio() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
+  const project = useProject();
   const { user, loading } = useAccount();
   const { settings } = useStudio();
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
@@ -113,32 +123,21 @@ export default function Studio() {
   if (!user || !isOwnerEmail(user.email)) return <OwnerGate />;
 
   const header = (
-    <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-panel/80 px-3 backdrop-blur">
-      <span className="flex shrink-0 items-center gap-2 text-sm font-extrabold uppercase tracking-[0.2em]">
-        <span className="grid size-7 place-items-center rounded-lg brand-gradient text-xs text-primary-foreground">
-          ▲
+    <header className="grid h-16 shrink-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b bg-panel/80 px-3 backdrop-blur">
+      <div className="min-w-0">
+        <span className="flex min-w-0 items-center gap-2 text-sm font-extrabold">
+          <span className="grid size-7 place-items-center rounded-lg brand-gradient text-xs text-primary-foreground">
+            ▲
+          </span>
+          OpenVibe
         </span>
-        OpenVibe
-      </span>
-      <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">
-        · {settings.model}
-      </span>
-      <div className="ml-auto flex items-center gap-0 sm:gap-1 [&>button]:px-2 sm:[&>button]:px-2.5">
-        <Btn
-          title={user ? "Mein Profil" : "Anmelden / Registrieren"}
-          onClick={() => setAccountOpen(true)}
-          className={cn(user && "text-primary")}
-        >
-          <UserRound size={17} />
-        </Btn>
-        <Btn title="Projekt-Übersicht" onClick={() => setOverviewOpen(true)}>
-          <LayoutGrid size={17} />
-        </Btn>
-        <Btn title="Code prüfen" onClick={() => setReviewOpen(true)}>
-          <ShieldCheck size={17} />
-        </Btn>
-        <Btn title="App veröffentlichen" onClick={() => setPublishOpen(true)}>
-          <Globe size={17} />
+        <p className="mt-0.5 truncate text-xs text-muted-foreground" title={project.name}>
+          {project.name}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-1">
+        <Btn variant="outline" title="Projekt-Übersicht" onClick={() => setOverviewOpen(true)}>
+          <LayoutGrid size={17} /> Projekte
         </Btn>
         {!hasKey && (
           <Btn
@@ -152,9 +151,28 @@ export default function Studio() {
             </span>
           </Btn>
         )}
-        <Btn title="Einstellungen" onClick={() => setSettingsOpen(true)}>
-          <Cog size={17} />
-        </Btn>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Btn title="Weitere Werkzeuge" aria-label="Weitere Werkzeuge">
+              <MoreHorizontal size={20} />
+            </Btn>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => setPublishOpen(true)}>
+              <Globe size={16} className="mr-2" /> App veröffentlichen
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setReviewOpen(true)}>
+              <ShieldCheck size={16} className="mr-2" /> Code prüfen
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+              <Cog size={16} className="mr-2" /> Einstellungen
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
+              <UserRound size={16} className="mr-2" /> Mein Profil
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );
@@ -163,11 +181,20 @@ export default function Studio() {
     return (
       <div className="flex h-dvh flex-col">
         {header}
-        <div className="grid min-h-0 flex-1 grid-cols-[200px_minmax(280px,1fr)_minmax(320px,1.3fr)]">
-          <aside className="min-h-0 border-r">
-            <FileTree onOpen={() => setRightTab("code")} />
-          </aside>
-          <section className="min-h-0 border-r">
+        <div
+          className={cn(
+            "grid min-h-0 flex-1",
+            filesOpen
+              ? "grid-cols-[200px_minmax(280px,1fr)_minmax(320px,1.3fr)]"
+              : "grid-cols-[minmax(320px,1fr)_minmax(380px,1.3fr)]",
+          )}
+        >
+          {filesOpen && (
+            <aside className="min-h-0 border-r">
+              <FileTree onOpen={() => setRightTab("code")} />
+            </aside>
+          )}
+          <section className="min-h-0 min-w-0 border-r">
             <Chat />
           </section>
           <section className="flex min-h-0 flex-col">
@@ -176,13 +203,21 @@ export default function Studio() {
                 className={cn(rightTab === "preview" && "bg-primary/20 text-primary")}
                 onClick={() => setRightTab("preview")}
               >
-                <Play size={14} /> Live
+                <Play size={14} /> Vorschau
               </Btn>
               <Btn
                 className={cn(rightTab === "code" && "bg-primary/20 text-primary")}
                 onClick={() => setRightTab("code")}
               >
                 <Code2 size={14} /> Code
+              </Btn>
+              <Btn
+                className={cn("ml-auto", filesOpen && "text-primary")}
+                aria-pressed={filesOpen}
+                onClick={() => setFilesOpen(!filesOpen)}
+                title="Projektdateien ein- oder ausblenden"
+              >
+                <Folder size={14} /> Dateien
               </Btn>
             </div>
             <div className="relative min-h-0 flex-1">
@@ -215,10 +250,10 @@ export default function Studio() {
   }
 
   const tabs: { id: Tab; label: string; icon: typeof Folder }[] = [
-    { id: "files", label: "Dateien", icon: Folder },
-    { id: "chat", label: "KI", icon: MessageSquare },
+    { id: "chat", label: "Erstellen", icon: MessageSquare },
+    { id: "preview", label: "Vorschau", icon: Play },
     { id: "code", label: "Code", icon: Code2 },
-    { id: "preview", label: "Preview", icon: Play },
+    { id: "files", label: "Dateien", icon: Folder },
   ];
   return (
     <div className="flex h-dvh flex-col">
@@ -248,6 +283,7 @@ export default function Studio() {
         {tabs.map((t) => (
           <Btn
             key={t.id}
+            aria-pressed={mobileTab === t.id}
             onClick={() => setMobileTab(t.id)}
             className={cn(
               "h-16 flex-col gap-1 rounded-none py-2 text-[11px] font-semibold",

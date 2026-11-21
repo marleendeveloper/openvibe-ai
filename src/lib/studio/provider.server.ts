@@ -187,8 +187,15 @@ export async function providerFetch(
     const response = await fetch(`https://connector-gateway.lovable.dev/udc_openrouter${path}`, {
       ...init,
       headers,
+      redirect: "manual",
       signal: init.signal ?? AbortSignal.timeout(120000),
     });
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
+      throw new Error(
+        "Der KI-Anbieter hat die Anfrage umgeleitet. Aus Sicherheitsgründen wurde sie nicht weitergeleitet.",
+      );
+    }
     if (!response.ok) {
       const detail = await response.text();
       console.error(`OpenRouter gateway [${response.status}]: ${detail.slice(0, 2000)}`);
@@ -214,9 +221,15 @@ export async function providerFetch(
   const response = await fetch(`${base}${path}`, {
     ...init,
     headers,
-    redirect: "error",
+    redirect: "manual",
     signal: init.signal ?? AbortSignal.timeout(120000),
   });
+  if (response.status >= 300 && response.status < 400) {
+    await response.body?.cancel();
+    throw new Error(
+      "Der KI-Anbieter hat die Anfrage umgeleitet. Aus Sicherheitsgründen wurde sie nicht weitergeleitet.",
+    );
+  }
   if (!response.ok) {
     const detail = (await response.text()).replaceAll(key, "[entfernt]");
     console.error(`External provider ${provider} [${response.status}]: ${detail.slice(0, 2000)}`);

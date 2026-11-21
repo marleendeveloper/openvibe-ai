@@ -11,8 +11,8 @@ import {
   Undo2,
   ImagePlus,
   RotateCw,
-  Sparkles,
   FileCode2,
+  SlidersHorizontal,
 } from "lucide-react";
 import { validateImageFile, freeVisionModel } from "@/lib/studio/phase5";
 import { loadProvider } from "@/lib/studio/provider-client";
@@ -238,73 +238,91 @@ export function Chat() {
   };
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex flex-wrap items-center gap-1 border-b px-2 py-1.5">
-        <div className="flex rounded-md border p-0.5">
-          <Btn
-            className={cn(
-              "h-7",
-              settings.mode === "agent" &&
-                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-            )}
-            onClick={() => setSettings({ mode: "agent" })}
-          >
-            <Bot size={14} /> Agent
-          </Btn>
-          <Btn
-            className={cn(
-              "h-7",
-              settings.mode === "chat" &&
-                "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
-            )}
-            onClick={() => setSettings({ mode: "chat" })}
-          >
-            <MessageSquare size={14} /> Chat
-          </Btn>
-        </div>
-        <label className="flex items-center gap-1.5 px-2 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={settings.autoApply}
-            onChange={(e) => setSettings({ autoApply: e.target.checked })}
-            className="accent-primary"
-          />{" "}
-          Auto-Anwenden
-        </label>
-        <label className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={settings.autoFix}
-            onChange={(e) => setSettings({ autoFix: e.target.checked })}
-            className="accent-primary"
-          />{" "}
-          Auto-Fix
-        </label>
-        <div className="ml-auto flex">
-          <Btn
-            title="Neue App erstellen"
-            disabled={busy}
-            onClick={() => setShowStarter(!showStarter)}
-          >
-            <Sparkles size={15} />
-          </Btn>
+    <div className="flex h-full min-w-0 flex-col">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 border-b px-3 py-2">
+        <Btn
+          variant="outline"
+          className="w-fit"
+          disabled={busy}
+          onClick={() => setShowStarter(!showStarter)}
+        >
+          <Bot size={15} /> Neue App
+        </Btn>
+        <div className="flex shrink-0 items-center gap-1">
           <Btn
             title="Letzte Änderung rückgängig"
+            aria-label="Letzte Änderung rückgängig"
             disabled={busy || !project.history.length}
             onClick={undo}
           >
             <Undo2 size={15} />
           </Btn>
-          <Btn
-            title="Änderungshistorie"
-            onClick={() => setShowHistory(!showHistory)}
-            className={cn(showHistory && "text-primary")}
-          >
-            <History size={15} />
-          </Btn>
-          <Btn title="Chat leeren" onClick={() => confirm("Chatverlauf leeren?") && clearChat()}>
-            <Eraser size={15} />
-          </Btn>
+          <details className="relative">
+            <summary
+              className="grid size-9 cursor-pointer list-none place-items-center rounded-lg text-muted-foreground hover:bg-accent hover:text-foreground"
+              aria-label="Erstellungsoptionen"
+              title="Erstellungsoptionen"
+            >
+              <SlidersHorizontal size={17} />
+            </summary>
+            <div className="absolute right-0 top-11 z-30 w-64 space-y-3 rounded-lg border bg-popover p-3 shadow-md">
+              <div className="flex rounded-md border p-0.5">
+                <Btn
+                  className={cn(
+                    "h-7",
+                    settings.mode === "agent" &&
+                      "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  )}
+                  onClick={() => setSettings({ mode: "agent" })}
+                >
+                  <Bot size={14} /> Erstellen
+                </Btn>
+                <Btn
+                  className={cn(
+                    "h-7",
+                    settings.mode === "chat" &&
+                      "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground",
+                  )}
+                  onClick={() => setSettings({ mode: "chat" })}
+                >
+                  <MessageSquare size={14} /> Fragen
+                </Btn>
+              </div>
+              <label className="flex items-center gap-1.5 px-2 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={settings.autoApply}
+                  onChange={(e) => setSettings({ autoApply: e.target.checked })}
+                  className="accent-primary"
+                />{" "}
+                Änderungen übernehmen
+              </label>
+              <label className="flex items-center gap-1.5 px-1 text-xs text-muted-foreground">
+                <input
+                  type="checkbox"
+                  checked={settings.autoFix}
+                  onChange={(e) => setSettings({ autoFix: e.target.checked })}
+                  className="accent-primary"
+                />{" "}
+                Fehler automatisch korrigieren
+              </label>
+              <div className="flex flex-col items-stretch">
+                <Btn
+                  title="Änderungshistorie"
+                  onClick={() => setShowHistory(!showHistory)}
+                  className={cn(showHistory && "text-primary")}
+                >
+                  <History size={15} /> Änderungsverlauf
+                </Btn>
+                <Btn
+                  title="Chat leeren"
+                  onClick={() => confirm("Chatverlauf leeren?") && clearChat()}
+                >
+                  <Eraser size={15} /> Chat leeren
+                </Btn>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
       {settings.mode === "agent" && project.messages.length > 0 && !showStarter && (
@@ -359,7 +377,7 @@ export function Chat() {
         </div>
       )}
 
-      <div className="min-h-0 flex-1 space-y-4 overflow-auto p-3">
+      <div className="min-h-0 min-w-0 flex-1 space-y-4 overflow-auto p-3 [overflow-wrap:anywhere]">
         {(project.messages.length === 0 || showStarter) && (
           <AppStarter
             key={project.id}
@@ -428,10 +446,13 @@ export function Chat() {
               }
             }}
             rows={2}
+            aria-label={settings.mode === "agent" ? "Deine Idee oder Änderung" : "Deine Frage"}
             placeholder={
-              settings.mode === "agent" ? "Baue mir eine Landingpage für…" : "Frag etwas…"
+              settings.mode === "agent"
+                ? "Was möchtest du bauen oder ändern?"
+                : "Was möchtest du wissen?"
             }
-            className="max-h-48 min-h-[44px] flex-1 resize-none bg-transparent px-2 py-1 outline-none"
+            className="max-h-48 min-h-[44px] min-w-0 flex-1 resize-none bg-transparent px-2 py-1 outline-none"
           />
           <Btn
             className="h-10 w-10 shrink-0"
@@ -461,8 +482,9 @@ export function Chat() {
             </Btn>
           )}
         </div>
-        <p className="mt-1 truncate px-1 font-mono text-[11px] text-muted-foreground">
-          {settings.model}
+        <p className="mt-1 truncate px-1 text-[11px] text-muted-foreground" title={settings.model}>
+          {PROVIDERS[settings.provider].name} ·{" "}
+          {settings.zeroCostOnly ? "0€-Schutz aktiv" : "0€-Schutz aus"}
         </p>
       </div>
     </div>

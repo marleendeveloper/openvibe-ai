@@ -33,6 +33,7 @@ use the editor.
 - Keep the existing TanStack studio, Zustand project store, CodeMirror editor and Sandpack preview; extend these modules rather than adding duplicate implementations.
 - External AI requests go only through same-origin server routes; provider credentials use AES-GCM encrypted HttpOnly per-provider cookies, with origin checks and no JavaScript-readable key persistence, to retain a database-free private studio.
 - Generic provider base URLs are server-configured, never browser-supplied, to prevent the relay becoming an arbitrary network proxy.
+- Provider fetches use manual redirects and reject every 3xx response before consuming output, because the published runtime does not support redirect:error and credentials must never follow redirects.
 - Pin every agent task, message, patch and preview check to its original project and file revision; reject stale patches to avoid overwriting concurrent edits.
 - Validate file operations atomically before snapshots and use bounded repair attempts with duplicate-error detection; preview success must match the changed revision.
 - Check live, complete OpenRouter pricing before zero-cost generation and connection tests; never infer free pricing from a model name or fall back to a paid model.

@@ -1,5 +1,13 @@
 # OpenVibe – Bestands- und Qualitätsaudit (Audit: 10.11.2026, 16:41 UTC; Gesamtstatus aktualisiert ~17:20 UTC)
 
+## Aktueller Fix-Plan — 21.11.2026
+
+1. Verbindungsfehler aus dem iPhone-Screenshot beheben: kompatible Weiterleitungsoption verwenden, jeden 3xx-Status ohne Folgeanfrage ablehnen. Schutztests für direkte und verknüpfte Anbieter.
+2. Studio vereinfachen: Projekte und ein Werkzeugmenü oben; Erstellen und Vorschau zuerst; Dateien auf Desktop einklappbar. Zusatzoptionen bleiben erreichbar, Zustimmungen und Kostenschutz unverändert.
+3. Tests ausführen und mit angemeldetem Eigentümer eine echte Erstellung samt Vorschau auf Handy/Desktop prüfen. Eine Prüfung der veröffentlichten Version nach Neuveröffentlichung bleibt separat.
+
+Der folgende Audit bleibt historisch; er ist kein Nachweis für den heutigen Stand.
+
 > Abschnitte 1–6 sind der Audit-Stand von 16:41 UTC. Der aktuelle Stand steht in Abschnitt 0 sowie 7–9.
 
 ## 0. Aktueller Gesamtstatus (~17:20 UTC)

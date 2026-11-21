@@ -1,5 +1,10 @@
 # Phase 2
 
+## Aktueller Auftrag — Verbindungsfehler und übersichtliches Studio
+- [ ] Nicht unterstützte Weiterleitungsoption ersetzen; Weiterleitungen weiterhin sicher ablehnen und testen.
+- [ ] Erstellen und Vorschau priorisieren; zusätzliche Werkzeuge und Optionen weiterhin erreichbar halten.
+- [ ] Automatische Tests und angemeldete Prüfung auf Handy und Desktop durchführen.
+
 ## Kostenloses Startmodell
 - [ ] Lightning anhand vollständiger Live-Preise bevorzugen, alten Standard umstellen und kostenlose Ausweichmodelle beibehalten.
 - [ ] Modellregeln testen und echte Projekterstellung mit angemeldetem Eigentümer prüfen.

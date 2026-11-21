@@ -21,6 +21,8 @@ import {
   readCredential,
   removeCredential,
   baseUrl,
+  providerFetch,
+  GATEWAY_MARKER,
 } from "./provider.server";
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -29,6 +31,51 @@ afterEach(() => {
 });
 
 describe("server provider security", () => {
+  it("uses worker-compatible manual redirects for direct provider requests", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response("ok"));
+    vi.stubGlobal("fetch", fetch);
+    const response = await providerFetch("openrouter", "test-only-key", "/models", {
+      redirect: "follow",
+    });
+    expect(await response.text()).toBe("ok");
+    expect(fetch).toHaveBeenCalledWith(
+      "https://openrouter.ai/api/v1/models",
+      expect.objectContaining({ redirect: "manual" }),
+    );
+  });
+  it.each([301, 302, 303, 307, 308])(
+    "rejects direct provider redirect %i without following or exposing credentials",
+    async (status) => {
+      const fetch = vi
+        .fn()
+        .mockResolvedValue(
+          new Response(null, { status, headers: { location: "https://other.example" } }),
+        );
+      vi.stubGlobal("fetch", fetch);
+      await expect(
+        providerFetch("openrouter", "test-only-key", "/chat/completions"),
+      ).rejects.toThrow("nicht weitergeleitet");
+      expect(fetch).toHaveBeenCalledTimes(1);
+    },
+  );
+  it("also refuses redirects from a linked connector", async () => {
+    vi.stubEnv("LOVABLE_API_KEY", "test-only-gateway-key");
+    vi.stubEnv("UDC_OPENROUTER_API_KEY", "test-only-connection-key");
+    const fetch = vi
+      .fn()
+      .mockResolvedValue(
+        new Response(null, { status: 307, headers: { location: "https://other.example" } }),
+      );
+    vi.stubGlobal("fetch", fetch);
+    await expect(
+      providerFetch("openrouter", GATEWAY_MARKER, "/models", { redirect: "follow" }),
+    ).rejects.toThrow("nicht weitergeleitet");
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ redirect: "manual" }),
+    );
+  });
   it("requires a same-origin request before mutating credentials or invoking AI", () => {
     expect(() =>
       assertSameOrigin(
