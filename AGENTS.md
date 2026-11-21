@@ -36,6 +36,7 @@ use the editor.
 - Pin every agent task, message, patch and preview check to its original project and file revision; reject stale patches to avoid overwriting concurrent edits.
 - Validate file operations atomically before snapshots and use bounded repair attempts with duplicate-error detection; preview success must match the changed revision.
 - Check live, complete OpenRouter pricing before zero-cost generation and connection tests; never infer free pricing from a model name or fall back to a paid model.
+- Use the shared live-catalog model preference for startup and automatic credential activation; upgrade only the former default, preserving deliberate model choices.
 - Keep code review separate from external-provider coding: authenticated server functions call the AI Gateway SDK, review only consented files, pin reports to project revisions, and never automatically apply suggestions.
 - Activate saved workspace provider credentials only through authenticated server actions that issue encrypted browser-scoped cookies; never return the credential or expose it to public AI requests without the cookie.
 - Keep one root account-session provider for account, studio and review state; private profiles are scoped to authenticated user IDs and signup triggers, while project code remains local.

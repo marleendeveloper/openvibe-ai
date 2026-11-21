@@ -15,7 +15,7 @@ export const useSavedOpenRouter = createServerFn({ method: "POST" })
     return { configured: true };
   });
 /** Accounts that get the saved OpenRouter key automatically after sign-in. */
-export const AUTO_KEY_EMAILS = ["marleendeveloper@gmail.com"];
+export const AUTO_KEY_EMAILS = ["marleendeveloper@gmail.com", "justinspoden01@icloud.com"];
 
 export const autoConnectSavedOpenRouter = createServerFn({ method: "POST" })
   .middleware([requireOwner])

@@ -28,11 +28,19 @@ export type ProviderStatus = {
 // Ordered preference, not a benchmark ranking. Only live zero-priced entries qualify.
 export function recommendedFreeModel(models: ModelInfo[]): string | undefined {
   const candidates = [
+    "nvidia/nemotron-3.5-lightning:free",
+    "nvidia/nemotron-3.5-super-vl:free",
     "nvidia/nemotron-3-ultra-550b-a55b:free",
     "cohere/north-mini-code:free",
     "openrouter/free",
   ];
   return candidates.find((id) => models.some((model) => model.id === id && model.free));
+}
+
+/** Upgrade the former automatic default, without replacing an explicitly selected model. */
+export function startupFreeModel(current: string, models: ModelInfo[]): string | undefined {
+  if (current && current !== "nvidia/nemotron-3-ultra-550b-a55b:free") return undefined;
+  return recommendedFreeModel(models);
 }
 
 export function hasZeroPricing(pricing: Record<string, unknown> | undefined): boolean {

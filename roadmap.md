@@ -1,5 +1,9 @@
 # Phase 2
 
+## Kostenloses Startmodell
+- [ ] Lightning anhand vollständiger Live-Preise bevorzugen, alten Standard umstellen und kostenlose Ausweichmodelle beibehalten.
+- [ ] Modellregeln testen und echte Projekterstellung mit angemeldetem Eigentümer prüfen.
+
 ## Benutzerfreundliche App-Erstellung
 - [ ] Schnellstarter starten echte KI-Erstellung in einem neuen Projekt, mit ausdrücklicher Übertragungszustimmung.
 - [ ] Kurzer Assistent: Typ, Thema/Name, Stil; bestehende Projekte bleiben unverändert.

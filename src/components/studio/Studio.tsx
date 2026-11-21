@@ -32,6 +32,7 @@ import { Btn } from "./ui";
 import { cn } from "@/lib/utils";
 import { useRuntime } from "@/lib/studio/runtime";
 import { loadProvider } from "@/lib/studio/provider-client";
+import { startupFreeModel } from "@/lib/studio/providers";
 import { CodeReview } from "./CodeReview";
 import { Account } from "./Account";
 import { Publish } from "./Publish";
@@ -62,8 +63,14 @@ export default function Studio() {
         if (!active) return;
         useRuntime.getState().setConnected(settings.provider, status.configured);
         const current = useStudio.getState().settings;
-        if (current.provider === settings.provider && !current.model && status.recommendedModel)
-          useStudio.getState().setSettings({ model: status.recommendedModel });
+        if (current.provider !== settings.provider) return;
+        const model =
+          current.provider === "openrouter" && current.zeroCostOnly
+            ? startupFreeModel(current.model, status.models)
+            : !current.model
+              ? status.recommendedModel
+              : undefined;
+        if (model) useStudio.getState().setSettings({ model });
       })
       .catch(() => undefined);
     return () => {
@@ -77,12 +84,13 @@ export default function Studio() {
     autoConnect()
       .then(async (r) => {
         if (!r.configured) return;
+        const status = await loadProvider("openrouter");
+        const model = startupFreeModel("", status.models);
         useStudio.getState().setSettings({
           provider: "openrouter",
-          model: "nvidia/nemotron-3-ultra-550b-a55b:free",
+          model: model ?? "",
           zeroCostOnly: true,
         });
-        const status = await loadProvider("openrouter");
         useRuntime.getState().setConnected("openrouter", status.configured);
       })
       .catch(() => undefined);

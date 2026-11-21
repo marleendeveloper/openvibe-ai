@@ -1,10 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { hasZeroPricing, recommendedFreeModel } from "./providers";
+import { hasZeroPricing, recommendedFreeModel, startupFreeModel } from "./providers";
 import { assertZeroCostModel } from "./provider.server";
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("zero-euro coding", () => {
+  it("prefers Lightning only while its live catalog entry is free", () => {
+    const models = [
+      { id: "nvidia/nemotron-3.5-lightning:free", name: "Lightning", free: true },
+      { id: "nvidia/nemotron-3.5-super-vl:free", name: "Super", free: true },
+    ];
+    expect(recommendedFreeModel(models)).toBe("nvidia/nemotron-3.5-lightning:free");
+    expect(recommendedFreeModel(models.map((m) => ({ ...m, free: m.name !== "Lightning" })))).toBe(
+      "nvidia/nemotron-3.5-super-vl:free",
+    );
+    expect(startupFreeModel("nvidia/nemotron-3-ultra-550b-a55b:free", models)).toBe(
+      "nvidia/nemotron-3.5-lightning:free",
+    );
+    expect(startupFreeModel("google/gemma-4-31b-it:free", models)).toBeUndefined();
+    expect(startupFreeModel("", [])).toBeUndefined();
+  });
   it("selects the coding preference only when currently free", () => {
     expect(
       recommendedFreeModel([

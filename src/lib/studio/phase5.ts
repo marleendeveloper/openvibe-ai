@@ -23,6 +23,7 @@ export function isRetryableError(error: unknown): boolean {
 
 /** Free models tried in order when the chosen free model is overloaded (HTTP 503/429). */
 export const OVERLOAD_FALLBACKS = [
+  "nvidia/nemotron-3.5-lightning:free",
   "nvidia/nemotron-3.5-super-vl:free",
   "google/gemma-4-31b-it:free",
 ] as const;
