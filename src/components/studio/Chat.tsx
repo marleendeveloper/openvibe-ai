@@ -281,7 +281,11 @@ export function Chat() {
           Auto-Fix
         </label>
         <div className="ml-auto flex">
-          <Btn title="Neue App erstellen" disabled={busy} onClick={() => setShowStarter(!showStarter)}>
+          <Btn
+            title="Neue App erstellen"
+            disabled={busy}
+            onClick={() => setShowStarter(!showStarter)}
+          >
             <Sparkles size={15} />
           </Btn>
           <Btn
@@ -303,7 +307,7 @@ export function Chat() {
           </Btn>
         </div>
       </div>
-      {settings.mode === "agent" && (
+      {settings.mode === "agent" && project.messages.length > 0 && !showStarter && (
         <label className="flex items-start gap-2 border-b px-3 py-2 text-xs text-muted-foreground">
           <input
             type="checkbox"
@@ -363,18 +367,19 @@ export function Chat() {
             {...(project.messages.length > 0 ? { onClose: () => setShowStarter(false) } : {})}
           />
         )}
-        {!showStarter && project.messages.map((m, i) => (
-          <Bubble
-            key={m.id}
-            m={m}
-            {...(m.error && i === project.messages.length - 1 && lastUser && !busy
-              ? {
-                  onRetry: () =>
-                    void runAgent(m.resume?.prompt ?? lastUser.content, [], undefined, m.resume),
-                }
-              : {})}
-          />
-        ))}
+        {!showStarter &&
+          project.messages.map((m, i) => (
+            <Bubble
+              key={m.id}
+              m={m}
+              {...(m.error && i === project.messages.length - 1 && lastUser && !busy
+                ? {
+                    onRetry: () =>
+                      void runAgent(m.resume?.prompt ?? lastUser.content, [], undefined, m.resume),
+                  }
+                : {})}
+            />
+          ))}
         <div ref={endRef} />
       </div>
 

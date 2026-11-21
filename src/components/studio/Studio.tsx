@@ -115,7 +115,7 @@ export default function Studio() {
       <span className="hidden truncate font-mono text-xs text-muted-foreground sm:inline">
         · {settings.model}
       </span>
-      <div className="ml-auto flex items-center gap-1">
+      <div className="ml-auto flex items-center gap-0 sm:gap-1 [&>button]:px-2 sm:[&>button]:px-2.5">
         <Btn
           title={user ? "Mein Profil" : "Anmelden / Registrieren"}
           onClick={() => setAccountOpen(true)}
@@ -133,9 +133,13 @@ export default function Studio() {
           <Globe size={17} />
         </Btn>
         {!hasKey && (
-          <Btn variant="primary" onClick={() => setSettingsOpen(true)}>
+          <Btn
+            variant="primary"
+            title="KI-Anbieter verbinden"
+            onClick={() => setSettingsOpen(true)}
+          >
             <KeyRound size={14} />
-            <span className="whitespace-nowrap">
+            <span className="hidden whitespace-nowrap sm:inline">
               <span className="hidden sm:inline">API-</span>Key
             </span>
           </Btn>

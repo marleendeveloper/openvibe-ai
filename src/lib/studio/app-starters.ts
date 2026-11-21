@@ -1,16 +1,71 @@
 export const APP_TYPES = [
-  { id: "shop", label: "Shop", subtitle: "Produkte & Warenkorb", name: "Rave Merch", topic: "Festival-Merch mit T-Shirts, Caps, Taschen und Stickern", features: "4 visuell dargestellte Produkte mit Preisen in Euro, Kategorienfilter, Warenkorb mit Mengenänderung und Gesamtsumme, Bestellübersicht ohne echte Zahlung" },
-  { id: "website", label: "Website", subtitle: "Marke & Angebote", name: "RaveSafe", topic: "Sicher feiern: Safer Use, Notfall-Hilfe und Community", features: "markante Startansicht, Angebote, passende Inhalte, Navigation zu den Abschnitten und ein funktionierender Kontakt-Dialog ohne vorgetäuschten Versand" },
-  { id: "dashboard", label: "Dashboard", subtitle: "Zahlen & Übersicht", name: "Pulse Analytics", topic: "Besucher, Umsatz und Anmeldungen eines kleinen Unternehmens", features: "Kennzahlen, Diagramm, umschaltbarer Zeitraum mit konsistenten Beispieldaten, durchsuchbare Tabelle und sichtbare Leerzustände" },
-  { id: "tasks", label: "Aufgaben", subtitle: "Planen & Abhaken", name: "Meine Aufgaben", topic: "Persönliche Aufgabenplanung", features: "Aufgaben hinzufügen, abhaken, löschen, nach Status filtern, Zähler, Eingabeprüfung und lokale Speicherung" },
-  { id: "weather", label: "Wetter", subtitle: "Ort & Vorhersage", name: "Berlin Wetter", topic: "Wetter in Berlin mit 21 °C", features: "große Wetteransicht, Celsius/Fahrenheit-Umschaltung, mehrtägige Beispieldaten und auswählbare Beispielorte; Daten ehrlich als Beispieldaten kennzeichnen" },
+  {
+    id: "shop",
+    label: "Shop",
+    subtitle: "Produkte & Warenkorb",
+    name: "Rave Merch",
+    topic: "Festival-Merch mit T-Shirts, Caps, Taschen und Stickern",
+    features:
+      "4 visuell dargestellte Produkte mit Preisen in Euro, Kategorienfilter, Warenkorb mit Mengenänderung und Gesamtsumme, Bestellübersicht ohne echte Zahlung",
+  },
+  {
+    id: "website",
+    label: "Website",
+    subtitle: "Marke & Angebote",
+    name: "RaveSafe",
+    topic: "Sicher feiern: Safer Use, Notfall-Hilfe und Community",
+    features:
+      "markante Startansicht, Angebote, passende Inhalte, Navigation zu den Abschnitten und ein funktionierender Kontakt-Dialog ohne vorgetäuschten Versand",
+  },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    subtitle: "Zahlen & Übersicht",
+    name: "Pulse Analytics",
+    topic: "Besucher, Umsatz und Anmeldungen eines kleinen Unternehmens",
+    features:
+      "Kennzahlen, Diagramm, umschaltbarer Zeitraum mit konsistenten Beispieldaten, durchsuchbare Tabelle und sichtbare Leerzustände",
+  },
+  {
+    id: "tasks",
+    label: "Aufgaben",
+    subtitle: "Planen & Abhaken",
+    name: "Meine Aufgaben",
+    topic: "Persönliche Aufgabenplanung",
+    features:
+      "Aufgaben hinzufügen, abhaken, löschen, nach Status filtern, Zähler, Eingabeprüfung und lokale Speicherung",
+  },
+  {
+    id: "weather",
+    label: "Wetter",
+    subtitle: "Ort & Vorhersage",
+    name: "Berlin Wetter",
+    topic: "Wetter in Berlin mit 21 °C",
+    features:
+      "große Wetteransicht, Celsius/Fahrenheit-Umschaltung, mehrtägige Beispieldaten und auswählbare Beispielorte; Daten ehrlich als Beispieldaten kennzeichnen",
+  },
 ] as const;
 
 export type AppKind = (typeof APP_TYPES)[number]["id"];
 export const APP_STYLES = [
-  { id: "dark", label: "Dunkel", description: "Kontrastreich & markant", instruction: "dunkle Oberflächen, markante Akzentfarbe passend zur Branche" },
-  { id: "light", label: "Hell", description: "Klar & aufgeräumt", instruction: "helle Oberflächen, klare Typografie, kräftige Akzentfarbe passend zur Branche" },
-  { id: "colorful", label: "Farbenfroh", description: "Lebendig & mutig", instruction: "lebendige, abgestimmte Farben mit gut lesbaren Kontrasten" },
+  {
+    id: "dark",
+    label: "Dunkel",
+    description: "Kontrastreich & markant",
+    instruction: "dunkle Oberflächen, markante Akzentfarbe passend zur Branche",
+  },
+  {
+    id: "light",
+    label: "Hell",
+    description: "Klar & aufgeräumt",
+    instruction: "helle Oberflächen, klare Typografie, kräftige Akzentfarbe passend zur Branche",
+  },
+  {
+    id: "colorful",
+    label: "Farbenfroh",
+    description: "Lebendig & mutig",
+    instruction: "lebendige, abgestimmte Farben mit gut lesbaren Kontrasten",
+  },
 ] as const;
 export type AppStyle = (typeof APP_STYLES)[number]["id"];
 export type AppDraft = { kind: AppKind; name: string; topic: string; style: AppStyle };
@@ -29,7 +84,7 @@ export function appPrompt(draft: AppDraft): string {
   return `App-Start: Erstelle eine vollständige, sofort bedienbare ${type.label} namens ${JSON.stringify(draft.name.trim())}. Thema: ${JSON.stringify(draft.topic.trim())}.
 Gestaltung: ${style.instruction}. Die Inhalte und Funktionen müssen zum Thema passen, nicht nur den Namen einer generischen Demo austauschen.
 Umfang: ${type.features}.
-Liefere die gesamte kleine App in einem Durchgang: vollständige Dateien, passende deutsche Inhalte und Visuals, fertiges CSS für Handy und Desktop. Alle sichtbaren Bedienelemente müssen funktionieren. Keine Lorem-Ipsum-Texte oder TODO-Platzhalter. Keine echte Zahlung, kein Versand und keine Live-Daten ohne angebundenen Dienst; kennzeichne Beispieldaten und lokale Aktionen ehrlich.`;
+Liefere die gesamte kleine App in einem Durchgang: vollständige Dateien, passende deutsche Inhalte und Visuals, fertiges CSS für Handy und Desktop. Halte den Code kompakt, nutze wiederverwendbare Komponenten und kurze selbst enthaltene Produktillustrationen statt sehr langer Bilddaten. Alle sichtbaren Bedienelemente müssen funktionieren. Keine Lorem-Ipsum-Texte oder TODO-Platzhalter. Keine echte Zahlung, kein Versand und keine Live-Daten ohne angebundenen Dienst; kennzeichne Beispieldaten und lokale Aktionen ehrlich.`;
 }
 
 /** Applies to all coding requests, including short free-form ideas and existing saved prompts. */

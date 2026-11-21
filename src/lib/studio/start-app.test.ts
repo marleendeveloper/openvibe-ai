@@ -12,9 +12,19 @@ beforeEach(() => {
   vi.clearAllMocks();
   useRuntime.setState({ busy: false });
   useStudio.getState().createProject("Existing work", { "/App.tsx": "existing code" });
-  useStudio.getState().setSettings({ provider: "openrouter", model: "test-model", mode: "chat", shareProject: false, autoApply: false, autoFix: false, zeroCostOnly: true });
+  useStudio.getState().setSettings({
+    provider: "openrouter",
+    model: "test-model",
+    mode: "chat",
+    shareProject: false,
+    autoApply: false,
+    autoFix: false,
+    zeroCostOnly: true,
+  });
   mocks.provider.mockResolvedValue({ configured: true });
-  mocks.agent.mockImplementation(async () => { useRuntime.getState().setBusy(true); });
+  mocks.agent.mockImplementation(async () => {
+    useRuntime.getState().setBusy(true);
+  });
 });
 
 describe("new app launches", () => {
@@ -27,13 +37,28 @@ describe("new app launches", () => {
   });
   it("starts the existing agent in a new project and preserves existing files and cost protection", async () => {
     const before = useStudio.getState();
-    const draft = { ...starterDraft("shop"), name: "Festival Store", topic: "Festival accessories", style: "light" as const };
+    const draft = {
+      ...starterDraft("shop"),
+      name: "Festival Store",
+      topic: "Festival accessories",
+      style: "light" as const,
+    };
     await startApp(draft, true);
     const after = useStudio.getState();
     expect(after.currentId).not.toBe(before.currentId);
-    expect(after.projects.find((p) => p.id === before.currentId)?.files).toEqual({ "/App.tsx": "existing code" });
+    expect(after.projects.find((p) => p.id === before.currentId)?.files).toEqual({
+      "/App.tsx": "existing code",
+    });
     expect(after.projects.find((p) => p.id === after.currentId)?.name).toBe("Festival Store");
-    expect(after.settings).toMatchObject({ mode: "agent", shareProject: true, autoApply: true, autoFix: true, zeroCostOnly: true, model: "test-model" });
+    expect(after.settings).toMatchObject({
+      mode: "agent",
+      shareProject: true,
+      autoApply: true,
+      autoFix: true,
+      zeroCostOnly: true,
+      model: "test-model",
+      maxTokens: 16384,
+    });
     expect(mocks.agent).toHaveBeenCalledExactlyOnceWith(appPrompt(draft));
   });
   it("does not create a project when the provider is disconnected", async () => {
