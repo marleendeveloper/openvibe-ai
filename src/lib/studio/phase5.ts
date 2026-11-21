@@ -71,9 +71,9 @@ export function freeVisionModel(models: ModelInfo[]): string | undefined {
 }
 
 /** Large tasks are planned into steps first. */
-/** Live-demo prompts describe one small app and are built in a single step for speed. */
+/** Starter and live-demo prompts describe one bounded app, built in one step. */
 export const needsPlan = (prompt: string) =>
-  !/^\s*Live-Demo:/i.test(prompt) &&
+  !/^\s*(Live-Demo|App-Start):/i.test(prompt) &&
   (prompt.trim().length > 280 || (prompt.match(/[,.;\n]/g)?.length ?? 0) >= 6);
 
 export function parsePlan(text: string): string[] {

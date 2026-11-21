@@ -1,5 +1,11 @@
 # Phase 2
 
+## Benutzerfreundliche App-Erstellung
+- [ ] Schnellstarter starten echte KI-Erstellung in einem neuen Projekt, mit ausdrücklicher Übertragungszustimmung.
+- [ ] Kurzer Assistent: Typ, Thema/Name, Stil; bestehende Projekte bleiben unverändert.
+- [ ] Generierungsregeln für vollständige, passend gestaltete und bedienbare Ergebnisse statt Platzhalter.
+- [ ] Automatische Tests und angemeldete Handy-/Desktop-Prüfung mit echtem Anbieter.
+
 - [x] Test the user-requested Nemotron model through the newly created OpenRouter connection. Live catalog showed zero prompt/completion pricing; real completion returned HTTP 200, complete React counter code, finish_reason stop, and reported cost 0.
 - [x] Link the new OpenRouter… done: linked OpenRouter connection; Nemotron generated counter (desktop) and todo list (mobile), applied, preview verified incl. adding an item.
 

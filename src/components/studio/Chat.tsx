@@ -14,7 +14,6 @@ import {
   Sparkles,
   FileCode2,
 } from "lucide-react";
-import { TEMPLATES, EXAMPLE_PROMPTS } from "@/lib/studio/templates";
 import { validateImageFile, freeVisionModel } from "@/lib/studio/phase5";
 import { loadProvider } from "@/lib/studio/provider-client";
 import type { ModelInfo } from "@/lib/studio/providers";
@@ -24,6 +23,7 @@ import { useRuntime } from "@/lib/studio/runtime";
 import { runAgent, stopAgent, applyMessageOps } from "@/lib/studio/agent";
 import { summarizeResponse } from "@/lib/studio/parse";
 import { Btn } from "./ui";
+import { AppStarter } from "./AppStarter";
 import { cn } from "@/lib/utils";
 
 async function compressImage(file: File): Promise<string> {
@@ -32,7 +32,9 @@ async function compressImage(file: File): Promise<string> {
   const canvas = document.createElement("canvas");
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Bild konnte nicht gelesen werden.");
+  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   return canvas.toDataURL("image/jpeg", 0.82);
 }
 
@@ -189,12 +191,12 @@ export function Chat() {
   const progress = useRuntime((s) => s.progress);
   const [input, setInput] = useState("");
   const [showHistory, setShowHistory] = useState(false);
+  const [showStarter, setShowStarter] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [images, setImages] = useState<string[]>([]);
   const [imgNote, setImgNote] = useState("");
   const [models, setModels] = useState<ModelInfo[]>([]);
-  const createProject = useStudio((s) => s.createProject);
   useEffect(() => {
     loadProvider(settings.provider)
       .then((st) => setModels(st.models))
@@ -279,6 +281,9 @@ export function Chat() {
           Auto-Fix
         </label>
         <div className="ml-auto flex">
+          <Btn title="Neue App erstellen" disabled={busy} onClick={() => setShowStarter(!showStarter)}>
+            <Sparkles size={15} />
+          </Btn>
           <Btn
             title="Letzte Änderung rückgängig"
             disabled={busy || !project.history.length}
@@ -351,53 +356,14 @@ export function Chat() {
       )}
 
       <div className="min-h-0 flex-1 space-y-4 overflow-auto p-3">
-        {project.messages.length === 0 && (
-          <div className="fade-up mx-auto max-w-xl space-y-5 py-4">
-            <div className="text-center">
-              <div className="mx-auto mb-3 grid size-12 place-items-center rounded-2xl brand-gradient text-primary-foreground glow">
-                <Sparkles size={22} />
-              </div>
-              <h2 className="text-xl font-extrabold">Was baust du heute?</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Starte mit einer Vorlage oder beschreibe deine Idee.
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {TEMPLATES.map((t) => (
-                <button
-                  key={t.id}
-                  onClick={() => createProject(t.name, t.files)}
-                  className="lift rounded-xl border bg-card p-3 text-left"
-                >
-                  <span className="text-2xl">{t.emoji}</span>
-                  <span className="mt-1 block text-sm font-bold">{t.name}</span>
-                  <span className="block text-xs text-muted-foreground">{t.description}</span>
-                </button>
-              ))}
-            </div>
-            <button
-              onClick={() => TEMPLATES.forEach((t) => createProject(`Demo: ${t.name}`, t.files))}
-              className="lift w-full rounded-xl brand-gradient px-3 py-2.5 text-sm font-bold text-primary-foreground"
-            >
-              Demo-Paket laden (alle 5 Vorzeige-Apps)
-            </button>
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Beispiel-Aufträge
-              </p>
-              {EXAMPLE_PROMPTS.map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setInput(p)}
-                  className="lift block w-full rounded-xl border border-dashed px-3 py-2 text-left text-sm text-muted-foreground hover:text-foreground"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-          </div>
+        {(project.messages.length === 0 || showStarter) && (
+          <AppStarter
+            key={project.id}
+            onStarted={() => setShowStarter(false)}
+            {...(project.messages.length > 0 ? { onClose: () => setShowStarter(false) } : {})}
+          />
         )}
-        {project.messages.map((m, i) => (
+        {!showStarter && project.messages.map((m, i) => (
           <Bubble
             key={m.id}
             m={m}
