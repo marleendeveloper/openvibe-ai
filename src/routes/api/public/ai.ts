@@ -8,6 +8,7 @@ export const Route = createFileRoute("/api/public/ai")({
           p.assertSameOrigin(request);
           await p.assertOwnerRequest(request);
           const data = p.chatSchema.parse(await p.readBoundedBody(request));
+          const { completionBody } = await import("@/lib/studio/creation");
           const key = await p.readCredential(data.provider);
           if (!key)
             return Response.json(
@@ -35,17 +36,7 @@ export const Route = createFileRoute("/api/public/ai")({
           const upstream = await p.providerFetch(data.provider, key, "/chat/completions", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify(
-              data.provider
-                ? {
-                    model: data.model,
-                    messages: data.messages,
-                    stream: data.stream,
-                    temperature: data.temperature,
-                    max_tokens: data.max_tokens,
-                  }
-                : {},
-            ),
+            body: JSON.stringify(completionBody(data)),
             signal: AbortSignal.any([request.signal, idle.signal, AbortSignal.timeout(600000)]),
           });
           if (!upstream.ok) {

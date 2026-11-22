@@ -1,5 +1,10 @@
 # Phase 2
 
+## Aktueller Auftrag — Schnelle Ergebnisse und relevante Rückfragen
+- [ ] Lange Denkphasen beim Anbieter vermeiden; nachvollziehbare Live-Arbeitsschritte statt interner Gedankengänge zeigen.
+- [ ] Relevante Rückfragen vor der Erstellung, mit sicherer Fortsetzung nur im ursprünglichen Projekt und Dateistand.
+- [ ] Automatische Regeln sowie echte Erstellung und Vorschau auf Handy/Desktop prüfen.
+
 ## Aktueller Auftrag — Qualität, Geschwindigkeit und iPhone-App
 - [x] Vorhandene 107 Tests und angemeldetes Studio auf Handy/Desktop prüfen.
 - [ ] Streaming-Aktualisierungen bündeln und unnötige Vorschau-/Studio-Aktualisierungen vermeiden.

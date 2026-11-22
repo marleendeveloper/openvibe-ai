@@ -42,7 +42,7 @@ it("repairs a duplicate-file response without applying either ambiguous variant"
   const wait = vi
     .spyOn(preview, "waitForPreview")
     .mockResolvedValue({ verified: true, error: null });
-  await runAgent("Erstelle eine Website.");
+  await runAgent("Erstelle eine Website für ein Fotostudio.");
   expect(stream).toHaveBeenCalledTimes(2);
   expect(current().files["/styles.css"]).toBe(DEFAULT_FILES["/styles.css"]);
   expect(current().files["/App.tsx"]).toContain("Ready");
@@ -55,7 +55,7 @@ it("stops on a repeated duplicate error and leaves files and snapshots unchanged
     opts.onToken(duplicate);
     return duplicate;
   });
-  await runAgent("Erstelle eine Website.");
+  await runAgent("Erstelle eine Website für ein Fotostudio.");
   expect(stream).toHaveBeenCalledTimes(2);
   expect(current().files).toEqual(DEFAULT_FILES);
   expect(current().history).toHaveLength(0);

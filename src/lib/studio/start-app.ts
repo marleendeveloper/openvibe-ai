@@ -7,7 +7,7 @@ import { appPrompt, type AppDraft } from "./app-starters";
 /** Explicit consent covers only the new project's files and the supplied idea. */
 export async function startApp(draft: AppDraft, consent: boolean): Promise<void> {
   if (!consent) throw new Error("Bitte zuerst der Übertragung deiner Angaben zustimmen.");
-  if (useRuntime.getState().busy)
+  if (useRuntime.getState().busy || useRuntime.getState().clarification)
     throw new Error("Bitte warte, bis der aktuelle Auftrag beendet ist.");
   const prompt = appPrompt(draft);
   const before = useStudio.getState();
@@ -19,6 +19,7 @@ export async function startApp(draft: AppDraft, consent: boolean): Promise<void>
   const now = useStudio.getState();
   if (
     useRuntime.getState().busy ||
+    useRuntime.getState().clarification ||
     now.currentId !== before.currentId ||
     now.settings.provider !== provider ||
     now.settings.model !== model

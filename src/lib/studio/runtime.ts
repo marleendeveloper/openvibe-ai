@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { ProviderId } from "./providers";
+import type { CreationClarification } from "./creation";
 
 export type LogLine = { level: string; text: string; at: number };
 
@@ -7,6 +8,8 @@ export const useRuntime = create<{
   error: string | null;
   logs: LogLine[];
   busy: boolean;
+  clarification: CreationClarification | null;
+  setClarification: (value: CreationClarification | null) => void;
   progress: string[];
   phase: "plan" | "write" | "check" | "done" | null;
   setPhase: (p: "plan" | "write" | "check" | "done" | null) => void;
@@ -33,6 +36,8 @@ export const useRuntime = create<{
   error: null,
   logs: [],
   busy: false,
+  clarification: null,
+  setClarification: (clarification) => set({ clarification }),
   progress: [],
   phase: null,
   setPhase: (phase) => set({ phase }),

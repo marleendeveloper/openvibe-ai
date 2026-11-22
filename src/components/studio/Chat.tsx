@@ -24,6 +24,7 @@ import { runAgent, stopAgent, applyMessageOps } from "@/lib/studio/agent";
 import { summarizeResponse } from "@/lib/studio/parse";
 import { Btn } from "./ui";
 import { AppStarter } from "./AppStarter";
+import { CreationQuestions } from "./CreationQuestions";
 import { cn } from "@/lib/utils";
 
 async function compressImage(file: File): Promise<string> {
@@ -75,8 +76,6 @@ function PhaseBar() {
 
 function Bubble({ m, onRetry }: { m: Message; onRetry?: () => void }) {
   const updateMessage = useStudio((s) => s.updateMessage);
-  const [showThink, setShowThink] = useState(false);
-  const think = m.content.match(/<think>([\s\S]*?)(<\/think>|$)/)?.[1];
   const body = summarizeResponse(m.content.replace(/<think>[\s\S]*?(<\/think>|$)/g, "")).trim();
   if (m.role === "user" || m.role === "system")
     return (
@@ -99,16 +98,6 @@ function Bubble({ m, onRetry }: { m: Message; onRetry?: () => void }) {
     );
   return (
     <div className="msg-in max-w-full space-y-2 rounded-2xl rounded-bl-md border bg-card/70 p-3 text-sm">
-      {think && (
-        <Btn onClick={() => setShowThink(!showThink)} className="text-xs">
-          {showThink ? "▾" : "▸"} Gedankengang
-        </Btn>
-      )}
-      {showThink && think && (
-        <pre className="max-h-60 overflow-auto rounded bg-muted p-2 text-xs whitespace-pre-wrap text-muted-foreground">
-          {think}
-        </pre>
-      )}
       {body ? (
         <div className="whitespace-pre-wrap leading-relaxed">{body}</div>
       ) : (
@@ -188,6 +177,7 @@ export function Chat() {
   const project = useProject();
   const { settings, setSettings, clearChat, restore, undo } = useStudio();
   const busy = useRuntime((s) => s.busy);
+  const clarification = useRuntime((s) => s.clarification);
   const progress = useRuntime((s) => s.progress);
   const [input, setInput] = useState("");
   const [showHistory, setShowHistory] = useState(false);
@@ -197,6 +187,10 @@ export function Chat() {
   const [images, setImages] = useState<string[]>([]);
   const [imgNote, setImgNote] = useState("");
   const [models, setModels] = useState<ModelInfo[]>([]);
+  useEffect(() => {
+    if (clarification && clarification.projectId !== project.id)
+      useRuntime.getState().setClarification(null);
+  }, [clarification, project.id]);
   useEffect(() => {
     loadProvider(settings.provider)
       .then((st) => setModels(st.models))
@@ -230,7 +224,7 @@ export function Chat() {
 
   const send = () => {
     const t = input.trim();
-    if (!t || busy) return;
+    if (!t || busy || clarification) return;
     setInput("");
     const imgs = images;
     setImages([]);
@@ -243,7 +237,7 @@ export function Chat() {
         <Btn
           variant="outline"
           className="w-fit"
-          disabled={busy}
+          disabled={busy || !!clarification}
           onClick={() => setShowStarter(!showStarter)}
         >
           <Bot size={15} /> Neue App
@@ -325,7 +319,7 @@ export function Chat() {
           </details>
         </div>
       </div>
-      {settings.mode === "agent" && project.messages.length > 0 && !showStarter && (
+      {settings.mode === "agent" && (project.messages.length > 0 || !!input.trim()) && !showStarter && (
         <label className="flex items-start gap-2 border-b px-3 py-2 text-xs text-muted-foreground">
           <input
             type="checkbox"
@@ -341,7 +335,11 @@ export function Chat() {
       )}
       <PhaseBar />
       {progress.length > 0 && (
-        <details className="border-b px-3 py-2 text-xs" open={busy}>
+        <details
+          className="max-h-44 shrink-0 overflow-auto border-b px-3 py-2 text-xs"
+          open={busy}
+          aria-label="Live-Arbeitsschritte"
+        >
           <summary className="cursor-pointer text-primary break-words">
             {progress[progress.length - 1]}
           </summary>
@@ -378,7 +376,7 @@ export function Chat() {
       )}
 
       <div className="min-h-0 min-w-0 flex-1 space-y-4 overflow-auto p-3 [overflow-wrap:anywhere]">
-        {(project.messages.length === 0 || showStarter) && (
+        {(project.messages.length === 0 || showStarter) && !clarification && (
           <AppStarter
             key={project.id}
             onStarted={() => setShowStarter(false)}
@@ -398,6 +396,17 @@ export function Chat() {
                 : {})}
             />
           ))}
+        {clarification?.projectId === project.id && (
+          <CreationQuestions
+            key={clarification.prompt}
+            pending={clarification}
+            onCancel={() => {
+              setInput(clarification.prompt);
+              setImages(clarification.images);
+              useRuntime.getState().setClarification(null);
+            }}
+          />
+        )}
         <div ref={endRef} />
       </div>
 
@@ -437,6 +446,7 @@ export function Chat() {
         />
         <div className="flex items-end gap-2 rounded-lg border bg-background p-1.5 focus-within:border-ring">
           <textarea
+            disabled={busy || !!clarification}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
@@ -475,7 +485,11 @@ export function Chat() {
               variant="primary"
               className="h-10 w-10 shrink-0"
               onClick={send}
-              disabled={!input.trim() || (settings.mode === "agent" && !settings.shareProject)}
+              disabled={
+                !!clarification ||
+                !input.trim() ||
+                (settings.mode === "agent" && !settings.shareProject)
+              }
               title="Senden (⌘/Strg+Enter)"
             >
               <Send size={16} />

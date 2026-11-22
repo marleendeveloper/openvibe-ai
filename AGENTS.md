@@ -47,3 +47,5 @@ use the editor.
 - MCP server lives in `src/lib/mcp/` (OAuth via managed auth issuer, owner-email check in `supabaseForUser`, read-only tools) and is mounted under `/api/public/mcp` because the app is published privately.
 - AI relay uses an idle timeout (not a total cap) and the agent falls back to other free models on overload, because slow free reasoning models stream for minutes and get overloaded.
 - Keep app starter definitions and coding-quality instructions in app-starters.ts; launch through start-app.ts into the existing agent with explicit new-project consent and provider preflight, so starters never replace existing work or bypass cost/security checks.
+- Run local product-choice checks before coding; hold questions in nonpersistent runtime state and validate project revision/provider/model before resuming, so unanswered or stale decisions never launch work.
+- Request nonreasoning OpenRouter completions through the shared completionBody helper; expose only public work summaries and observed file/preview progress, so reasoning does not consume the code budget or appear as public output.

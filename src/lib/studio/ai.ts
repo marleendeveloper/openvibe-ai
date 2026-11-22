@@ -56,7 +56,6 @@ export async function streamChat(opts: {
   const dec = new TextDecoder();
   let buf = "";
   let full = "";
-  let inReasoning = false;
   let received = 0;
   let finished = false;
   const event = (lines: string[]) => {
@@ -84,19 +83,8 @@ export async function streamChat(opts: {
       );
     if (choice?.finish_reason) finished = true;
     const d = choice?.delta ?? {};
-    const reasoning = d.reasoning_content ?? d.reasoning;
-    if (typeof reasoning === "string" && reasoning) {
-      if (!inReasoning) {
-        opts.onToken("<think>");
-        inReasoning = true;
-      }
-      opts.onToken(reasoning);
-    }
+    // Provider reasoning is not public output. The agent streams a concise work summary instead.
     if (typeof d.content === "string") {
-      if (inReasoning) {
-        opts.onToken("</think>");
-        inReasoning = false;
-      }
       full += d.content;
       opts.onToken(d.content);
     }
@@ -128,7 +116,6 @@ export async function streamChat(opts: {
     await reader.cancel().catch(() => undefined);
     reader.releaseLock();
   }
-  if (inReasoning) opts.onToken("</think>");
   if (!finished)
     throw new Error("KI-Verbindung wurde vor Abschluss unterbrochen. Keine Dateien angewendet.");
   if (!full.trim()) throw new Error("Der Anbieter hat keinen Antworttext geliefert.");

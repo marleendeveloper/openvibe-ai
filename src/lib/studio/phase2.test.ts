@@ -203,7 +203,7 @@ describe("streaming and agent", () => {
     await runAgent("Create an app");
     expect(fetch).not.toHaveBeenCalled();
   });
-  it("handles reasoning deltas separately from content", async () => {
+  it("does not publish private reasoning deltas as chat output", async () => {
     vi.stubGlobal(
       "fetch",
       vi
@@ -226,7 +226,7 @@ describe("streaming and agent", () => {
         },
       }),
     ).toBe("answer");
-    expect(output).toBe("<think>plan</think>answer");
+    expect(output).toBe("answer");
   });
 });
 
