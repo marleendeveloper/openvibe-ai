@@ -1,5 +1,12 @@
 # Phase 2
 
+## Aktueller Auftrag — Qualität, Geschwindigkeit und iPhone-App
+- [x] Vorhandene 107 Tests und angemeldetes Studio auf Handy/Desktop prüfen.
+- [ ] Streaming-Aktualisierungen bündeln und unnötige Vorschau-/Studio-Aktualisierungen vermeiden.
+- [ ] Echte Schnellstarter-Erstellung, Vorschau und weitere erreichbare Funktionen prüfen.
+- [ ] Sicherheitsprüfung und Veröffentlichung durchführen.
+- [ ] Installation ohne Safari-Leiste erklären; echtes iPhone, Passkey und Mailzustellung bleiben Nutzerprüfungen.
+
 ## Aktueller Auftrag — Verbindungsfehler und übersichtliches Studio
 - [ ] Nicht unterstützte Weiterleitungsoption ersetzen; Weiterleitungen weiterhin sicher ablehnen und testen.
 - [ ] Erstellen und Vorschau priorisieren; zusätzliche Werkzeuge und Optionen weiterhin erreichbar halten.

@@ -15,7 +15,11 @@ export default function PublishedSandpack({
       theme="dark"
       options={{ initMode: "immediate", recompileMode: "delayed", recompileDelay: 400 }}
     >
-      <SandpackPreview showOpenInCodeSandbox={false} showRefreshButton={false} style={{ height: "100%" }} />
+      <SandpackPreview
+        showOpenInCodeSandbox={false}
+        showRefreshButton={false}
+        style={{ height: "100%" }}
+      />
     </SandpackProvider>
   );
 }

@@ -7,13 +7,14 @@ import {
   needsPlan,
   parsePlan,
 } from "./phase5";
-import { parseFileOps } from "./parse";
+import { parseFileOps, type FileOp } from "./parse";
 import { useStudio, uid, type ResumePoint } from "./store";
 import { useRuntime } from "./runtime";
 import { LIMITS, byteSize } from "./limits";
 import { loadProvider } from "./provider-client";
 import { filesRevision, waitForPreview, repairDecision } from "./preview-state";
 import { PRODUCT_RULES } from "./app-starters";
+import { streamUpdates } from "./stream-updates";
 
 let controller: AbortController | null = null;
 export const stopAgent = () => controller?.abort();
@@ -257,23 +258,41 @@ export async function runAgent(
         if (byteSize(JSON.stringify(messages)) > LIMITS.requestBytes - 2000)
           throw new Error("Projekt und Chat sind zu groß. Chat leeren oder Projekt verkleinern.");
         let acc = "";
-        await send(
-          messages,
-          (t) => {
-            acc += t;
-            useStudio.getState().updateMessage(aid, { content: acc }, projectId);
-          },
-          () => {
-            acc = "";
-            useStudio.getState().updateMessage(aid, { content: "" }, projectId);
-          },
+        const messageId = aid;
+        const updates = streamUpdates((content) =>
+          useStudio.getState().updateMessage(messageId, { content }, projectId),
         );
+        try {
+          await send(
+            messages,
+            (t) => {
+              acc += t;
+              updates.append(t);
+            },
+            () => {
+              acc = "";
+              updates.reset();
+            },
+          );
+        } finally {
+          updates.flush();
+        }
         if (!agent) {
           rt.step("Antwort abgeschlossen");
           break;
         }
         const clean = acc.replace(/<think>[\s\S]*?(<\/think>|$)/g, "");
-        const ops = parseFileOps(clean);
+        let ops: FileOp[];
+        try {
+          ops = parseFileOps(clean);
+        } catch (e) {
+          const diagnostic = e instanceof Error ? e.message : "Ungültige Dateiänderungen.";
+          st.updateMessage(aid, { error: diagnostic }, projectId);
+          if (!s.autoFix || repairDecision(attempt, diagnostic, seen) !== "repair") throw e;
+          rt.step("Ungültige Dateiantwort · automatisch korrigieren");
+          task = `Original user task: ${stepTask}\n\nYour previous output was rejected before applying any file: ${diagnostic}\nReturn the complete corrected files, each path exactly once. No partial files or repeated variants.`;
+          continue;
+        }
         // In a multi-step plan the model may report that an earlier step already covered this one.
         // Continue with a visible note instead of claiming file changes; empty replies still fail.
         if (!ops.length && steps.length > 1 && !attempt && clean.trim()) {

@@ -26,7 +26,10 @@ export const Route = createFileRoute("/api/public/ai")({
           let idleTimer: ReturnType<typeof setTimeout> | undefined;
           const touch = () => {
             clearTimeout(idleTimer);
-            idleTimer = setTimeout(() => idle.abort(new Error("Anbieter antwortet nicht mehr.")), 90000);
+            idleTimer = setTimeout(
+              () => idle.abort(new Error("Anbieter antwortet nicht mehr.")),
+              90000,
+            );
           };
           touch();
           const upstream = await p.providerFetch(data.provider, key, "/chat/completions", {

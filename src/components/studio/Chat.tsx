@@ -225,7 +225,7 @@ export function Chat() {
     if (fileRef.current) fileRef.current.value = "";
   };
   useEffect(() => {
-    endRef.current?.scrollIntoView({ block: "end" });
+    if (project.messages.length) endRef.current?.scrollIntoView({ block: "end" });
   }, [project.messages]);
 
   const send = () => {

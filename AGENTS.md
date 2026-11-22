@@ -30,6 +30,7 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## OpenVibe architecture
+- Coalesce streamed chat persistence and flush at completion, failure and retry boundaries; subscribe preview rendering only to project identity/files to avoid rebuilding unchanged previews for each token.
 - Keep the existing TanStack studio, Zustand project store, CodeMirror editor and Sandpack preview; extend these modules rather than adding duplicate implementations.
 - External AI requests go only through same-origin server routes; provider credentials use AES-GCM encrypted HttpOnly per-provider cookies, with origin checks and no JavaScript-readable key persistence, to retain a database-free private studio.
 - Generic provider base URLs are server-configured, never browser-supplied, to prevent the relay becoming an arbitrary network proxy.
