@@ -12,7 +12,7 @@ import {
   LayoutGrid,
   MoreHorizontal,
 } from "lucide-react";
-import { useStudio, useProject } from "@/lib/studio/store";
+import { useStudio } from "@/lib/studio/store";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -35,16 +35,16 @@ const Preview = () => (
     <LazyPreview />
   </Suspense>
 );
-import { Settings } from "./Settings";
+const Settings = lazy(() => import("./Settings").then((m) => ({ default: m.Settings })));
 import { Btn } from "./ui";
 import { cn } from "@/lib/utils";
 import { useRuntime } from "@/lib/studio/runtime";
 import { loadProvider } from "@/lib/studio/provider-client";
 import { startupFreeModel } from "@/lib/studio/providers";
-import { CodeReview } from "./CodeReview";
-import { Account } from "./Account";
-import { Publish } from "./Publish";
-import { Overview } from "./Overview";
+const CodeReview = lazy(() => import("./CodeReview").then((m) => ({ default: m.CodeReview })));
+const Account = lazy(() => import("./Account").then((m) => ({ default: m.Account })));
+const Publish = lazy(() => import("./Publish").then((m) => ({ default: m.Publish })));
+const Overview = lazy(() => import("./Overview").then((m) => ({ default: m.Overview })));
 import { useAccount } from "@/lib/studio/auth-state";
 import { OwnerGate } from "./Passkeys";
 import { isOwnerEmail } from "@/lib/studio/owner";
@@ -62,9 +62,11 @@ export default function Studio() {
   const [publishOpen, setPublishOpen] = useState(false);
   const [overviewOpen, setOverviewOpen] = useState(false);
   const [filesOpen, setFilesOpen] = useState(false);
-  const project = useProject();
+  const projectName = useStudio(
+    (s) => s.projects.find((p) => p.id === s.currentId)?.name ?? "OpenVibe",
+  );
   const { user, loading } = useAccount();
-  const { settings } = useStudio();
+  const settings = useStudio((s) => s.settings);
   const hasKey = useRuntime((s) => s.connected[settings.provider]);
   useEffect(() => {
     let active = true;
@@ -131,8 +133,8 @@ export default function Studio() {
           </span>
           OpenVibe
         </span>
-        <p className="mt-0.5 truncate text-xs text-muted-foreground" title={project.name}>
-          {project.name}
+        <p className="mt-0.5 truncate text-xs text-muted-foreground" title={projectName}>
+          {projectName}
         </p>
       </div>
       <div className="flex shrink-0 items-center gap-1">
@@ -179,7 +181,7 @@ export default function Studio() {
 
   if (isDesktop) {
     return (
-      <div className="flex h-dvh flex-col">
+      <div className="flex h-dvh flex-col pt-[env(safe-area-inset-top)]">
         {header}
         <div
           className={cn(
@@ -232,19 +234,21 @@ export default function Studio() {
             </div>
           </section>
         </div>
-        {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
-        {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
-        {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
-        {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
-        {overviewOpen && (
-          <Overview
-            onClose={() => setOverviewOpen(false)}
-            onSignIn={() => {
-              setOverviewOpen(false);
-              setAccountOpen(true);
-            }}
-          />
-        )}
+        <Suspense fallback={<Loading />}>
+          {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+          {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
+          {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
+          {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
+          {overviewOpen && (
+            <Overview
+              onClose={() => setOverviewOpen(false)}
+              onSignIn={() => {
+                setOverviewOpen(false);
+                setAccountOpen(true);
+              }}
+            />
+          )}
+        </Suspense>
       </div>
     );
   }
@@ -256,7 +260,7 @@ export default function Studio() {
     { id: "files", label: "Dateien", icon: Folder },
   ];
   return (
-    <div className="flex h-dvh flex-col">
+    <div className="flex h-dvh flex-col pt-[env(safe-area-inset-top)]">
       {header}
       <main className="relative min-h-0 flex-1">
         <div className={cn("tab-in absolute inset-0 z-10", mobileTab !== "files" && "hidden")}>
@@ -302,19 +306,21 @@ export default function Studio() {
           </Btn>
         ))}
       </nav>
-      {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
-      {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
-      {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
-      {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
-      {overviewOpen && (
-        <Overview
-          onClose={() => setOverviewOpen(false)}
-          onSignIn={() => {
-            setOverviewOpen(false);
-            setAccountOpen(true);
-          }}
-        />
-      )}
+      <Suspense fallback={<Loading />}>
+        {settingsOpen && <Settings onClose={() => setSettingsOpen(false)} />}
+        {reviewOpen && <CodeReview onClose={() => setReviewOpen(false)} />}
+        {accountOpen && <Account onClose={() => setAccountOpen(false)} />}
+        {publishOpen && <Publish onClose={() => setPublishOpen(false)} />}
+        {overviewOpen && (
+          <Overview
+            onClose={() => setOverviewOpen(false)}
+            onSignIn={() => {
+              setOverviewOpen(false);
+              setAccountOpen(true);
+            }}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

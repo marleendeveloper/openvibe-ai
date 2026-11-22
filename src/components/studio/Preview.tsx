@@ -6,7 +6,7 @@ import {
   useSandpackConsole,
 } from "@codesandbox/sandpack-react";
 import { Monitor, Smartphone, RotateCw, Wrench, Trash2 } from "lucide-react";
-import { useProject } from "@/lib/studio/store";
+import { useStudio } from "@/lib/studio/store";
 import { useRuntime } from "@/lib/studio/runtime";
 import { runAgent } from "@/lib/studio/agent";
 import { Btn } from "./ui";
@@ -68,32 +68,34 @@ function Listener({ projectId, revision }: { projectId: string; revision: string
 }
 
 export function Preview() {
-  const project = useProject();
+  const projectId = useStudio((s) => s.currentId);
+  const projectFiles = useStudio((s) => s.projects.find((p) => p.id === s.currentId)?.files);
   const [device, setDevice] = useState<"desktop" | "mobile">("desktop");
   const [tab, setTab] = useState<"preview" | "console">("preview");
   const [k, setK] = useState(0);
   const error = useRuntime((s) => s.error);
   const logs = useRuntime((s) => s.logs);
   const busy = useRuntime((s) => s.busy);
-  const revision = useMemo(() => filesRevision(project.files), [project.files]);
+  const revision = useMemo(() => filesRevision(projectFiles ?? {}), [projectFiles]);
   const previewState = useRuntime((s) => s.preview);
   const previewReady =
-    previewState?.projectId === project.id &&
+    previewState?.projectId === projectId &&
     previewState.revision === revision &&
     previewState.status === "ready";
 
   const customSetup = useMemo(() => {
     let dependencies: Record<string, string> = {};
     try {
-      dependencies = JSON.parse(project.files["/package.json"] ?? "{}").dependencies ?? {};
+      dependencies = JSON.parse(projectFiles?.["/package.json"] ?? "{}").dependencies ?? {};
     } catch {
       /* invalid json reported by generated application */
     }
     return { dependencies };
-  }, [project.files["/package.json"]]);
+  }, [projectFiles]);
   const files = useMemo(
-    () => Object.fromEntries(Object.entries(project.files).filter(([p]) => p !== "/package.json")),
-    [project.files],
+    () =>
+      Object.fromEntries(Object.entries(projectFiles ?? {}).filter(([p]) => p !== "/package.json")),
+    [projectFiles],
   );
   const options = useMemo(
     () => ({
@@ -106,14 +108,14 @@ export function Preview() {
 
   return (
     <SandpackProvider
-      key={project.id + k + revision}
+      key={projectId + k + revision}
       template="react-ts"
       files={files}
       customSetup={customSetup}
       theme="dark"
       options={options}
     >
-      <Listener projectId={project.id} revision={revision} />
+      <Listener projectId={projectId} revision={revision} />
       <div className="flex h-full flex-col">
         <div className="flex items-center gap-1 border-b px-2 py-1.5">
           <Btn
